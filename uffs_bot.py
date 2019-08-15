@@ -1,7 +1,7 @@
 import os
 import requests
 from bs4 import BeautifulSoup
-import datetime
+from datetime import datetime, date
 import telepot
 
 bot = telepot.Bot(os.environ['telegramToken'])
@@ -13,10 +13,10 @@ def onMsgReceived(msg):
     msgToSend = ''
 
     if msg['text'] == '/start':
-        msgToSend = 'Olá!\nExecute um dos comandos abaixo para continuar:\n1 - \\cardapio'
+        msgToSend = 'Olá!\nExecute um dos comandos abaixo para continuar:\n\\cardapio - Mostra o cardápio do dia'
     elif msg['text'] == '/cardapio':
-        if datetime.date.today() in menuCache:
-            msgToSend = menuCache[datetime.date.today()]
+        if date.today() in menuCache:
+            msgToSend = menuCache[date.today()]
         else:
             bot.sendMessage(msg['chat']['id'], 'Aguarde enquanto baixamos o cardápio...')
             msgToSend = formatMenuMsg(getMenu())
@@ -27,8 +27,18 @@ def onMsgReceived(msg):
 def getMenu():
     page = requests.get(URL_MENU_RU_CCO)
     soup = BeautifulSoup(page.text, 'html.parser')
-    table = soup.find('table')
-    dayNumber = datetime.datetime.today().weekday()
+    week = soup.find_all('strong')
+    table = soup.find_all('table')
+    for index, textContent in enumerate(week):
+        if('Semana' in textContent.string):
+            weekNumberToday = datetime.today().isocalendar()[1]
+            weekNumberCalendar = date(datetime.today().year, datetime.today().month, int(week[index+1].string)).isocalendar()[1]
+            if(weekNumberToday == weekNumberCalendar):
+                table = table[0]
+            else:
+                table = table[1]
+            break
+    dayNumber = datetime.today().weekday()
     results = []
     trList = table.find_all('tr')
     
@@ -44,7 +54,7 @@ def formatMenuMsg(dirtyMenuList):
     for menuItem in dirtyMenuList:
         prettyMsg += menuItem + '\n'
 
-    menuCache[datetime.date.today()] = prettyMsg
+    menuCache[date.today()] = prettyMsg
 
     return prettyMsg
 
