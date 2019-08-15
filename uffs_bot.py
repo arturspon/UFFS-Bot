@@ -1,9 +1,10 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 import datetime
 import telepot
 
-bot = telepot.Bot('914192444:AAFy6E1ykzKeOeHcxZRtrNd_ME7KpoBg9rs')
+bot = telepot.Bot(os.environ['telegramToken'])
 URL_MENU_RU_CCO = 'https://www.uffs.edu.br/campi/chapeco/restaurante_universitario'
 
 menuCache = {}
