@@ -6,11 +6,19 @@ import telepot
 bot = telepot.Bot('914192444:AAFy6E1ykzKeOeHcxZRtrNd_ME7KpoBg9rs')
 URL_MENU_RU_CCO = 'https://www.uffs.edu.br/campi/chapeco/restaurante_universitario'
 
+menuCache = {}
+
 def onMsgReceived(msg):
+    msgToSend = ''
+
     if msg['text'] == '/cardapio':
-        bot.sendMessage(msg['chat']['id'], 'Aguarde enquanto baixamos o cardápio...')
-        todayMenuResults = getMenu()
-        bot.sendMessage(msg['chat']['id'], formatMenuMsg(todayMenuResults))
+        if datetime.date.today() in menuCache:
+            msgToSend = menuCache[datetime.date.today()]
+        else:
+            bot.sendMessage(msg['chat']['id'], 'Aguarde enquanto baixamos o cardápio...')
+            msgToSend = formatMenuMsg(getMenu())
+    
+    bot.sendMessage(msg['chat']['id'], msgToSend)
 
 def getMenu():
     page = requests.get(URL_MENU_RU_CCO)
@@ -31,6 +39,8 @@ def formatMenuMsg(dirtyMenuList):
 
     for menuItem in dirtyMenuList:
         prettyMsg += menuItem + '\n'
+
+    menuCache[datetime.date.today()] = prettyMsg
 
     return prettyMsg
 
