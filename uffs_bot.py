@@ -12,14 +12,17 @@ menuCache = {}
 def onMsgReceived(msg):
     msgToSend = ''
 
-    if msg['text'] == '/cardapio':
+    if msg['text'] == '/start':
+        msgToSend = 'Olá!\nExecute um dos comandos abaixo para continuar:\n1 - \\cardapio'
+    elif msg['text'] == '/cardapio':
         if datetime.date.today() in menuCache:
             msgToSend = menuCache[datetime.date.today()]
         else:
             bot.sendMessage(msg['chat']['id'], 'Aguarde enquanto baixamos o cardápio...')
             msgToSend = formatMenuMsg(getMenu())
     
-    bot.sendMessage(msg['chat']['id'], msgToSend)
+    if msgToSend:
+        bot.sendMessage(msg['chat']['id'], msgToSend)
 
 def getMenu():
     page = requests.get(URL_MENU_RU_CCO)
