@@ -1,1 +1,1 @@
-web: python uffs_bot.py
+web: python uffs_bot.py -p $PORT
