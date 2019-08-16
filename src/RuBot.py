@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, date
 import time
+import os
+import re
 
 class RuBot:
     URL_MENU_RU_CCO = 'https://www.uffs.edu.br/campi/chapeco/restaurante_universitario'
@@ -10,36 +12,22 @@ class RuBot:
     def getMenu(self):
         page = requests.get(self.URL_MENU_RU_CCO)
         soup = BeautifulSoup(page.text, 'html.parser')
-        week = soup.find_all('strong')
         table = soup.find_all('table')
-        for index, textContent in enumerate(week):
-            if('Semana' in textContent.string):
-                weekNumberToday = datetime.today().isocalendar()[1]
-                weekNumberCalendar = date(datetime.today().year, datetime.today().month, int(week[index+1].string)).isocalendar()[1]
-                if(weekNumberToday == weekNumberCalendar):
-                    table = table[0]
-                else:
-                    table = table[1]
-                break
-        dayNumber = datetime.today().weekday()
-        results = []
-        trList = table.find_all('tr')
-        
-        for i in range(0, 10):
-            tdList = trList[i + 1].find_all('td')
-            results.append(tdList[dayNumber].find('p').string)
+        week = soup.findAll(text=re.compile('Semana'))
+        firstWeek = re.search(r'(\d+/\d+/\d+)', week[0].findParent('p').text).group(1).split('/')
+        weekNumberToday = datetime.today().isocalendar()[1]
+        weekNumberCalendar = date(int(firstWeek[2]), int(firstWeek[1]), int(firstWeek[0])).isocalendar()[1]
+        if(weekNumberToday == weekNumberCalendar):
+            html = str(week[0].findParent('p')) + str(table[0])
+        else:
+            html = str(week[1].findParent('p')) + str(table[1])
 
-        return results
+        img = requests.post('https://hcti.io/v1/image', data = {'HTML': html}, auth=(os.environ['htciId'], os.environ['htciKey']))
+        imgUrl = img.text.split('"')[3]
 
-    def formatMenuMsg(self, dirtyMenuList):
-        prettyMsg ='O cardápio para hoje é:\n\n'
+        self.menuCache[date.today()] = imgUrl
 
-        for menuItem in dirtyMenuList:
-            prettyMsg += menuItem + '\n'
-
-        self.menuCache[date.today()] = prettyMsg
-
-        return prettyMsg
+        return imgUrl
 
     def showCardapio(self, bot, update):
         chatId = None
@@ -49,10 +37,10 @@ class RuBot:
             chatId = update['callback_query']['message']['chat']['id']
 
         if date.today() in self.menuCache:
-            msgToSend = self.menuCache[date.today()]
+            imgToSend = self.menuCache[date.today()]
         else:
             bot.sendMessage(chatId, 'Aguarde enquanto baixamos o cardápio...')
-            msgToSend = self.formatMenuMsg(self.getMenu())
+            imgToSend = self.getMenu()
         
-        if msgToSend:
-            bot.sendMessage(chatId, msgToSend)
+        if imgToSend:
+            bot.send_photo(chat_id=chatId, photo=imgToSend)
