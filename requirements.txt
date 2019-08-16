@@ -1,5 +1,5 @@
 beautifulsoup4==4.6.0
-requests==2.18.4
+requests==2.20.0
 requests-unixsocket==0.1.5
 selenium==3.141.0
 telepot==12.7
