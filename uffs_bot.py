@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, date
 import telepot
+import time
 
 bot = telepot.Bot(os.environ['telegramToken'])
 URL_MENU_RU_CCO = 'https://www.uffs.edu.br/campi/chapeco/restaurante_universitario'
@@ -60,5 +61,5 @@ def formatMenuMsg(dirtyMenuList):
 
 bot.message_loop(onMsgReceived)
 
-while True:
-    pass
+while 1:
+    time.sleep(10)

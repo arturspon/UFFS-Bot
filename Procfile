@@ -1,1 +1,1 @@
-web: python uffs_bot.py -p $PORT
+worker: python uffs_bot.py
