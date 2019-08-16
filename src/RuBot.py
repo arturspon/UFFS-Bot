@@ -42,11 +42,17 @@ class RuBot:
         return prettyMsg
 
     def showCardapio(self, bot, update):
+        chatId = None
+        try:
+            chatId = update.message.chat_id
+        except:
+            chatId = update['callback_query']['message']['chat']['id']
+
         if date.today() in self.menuCache:
             msgToSend = self.menuCache[date.today()]
         else:
-            bot.sendMessage(update.message.chat_id, 'Aguarde enquanto baixamos o cardápio...')
+            bot.sendMessage(chatId, 'Aguarde enquanto baixamos o cardápio...')
             msgToSend = self.formatMenuMsg(self.getMenu())
         
         if msgToSend:
-            bot.sendMessage(update.message.chat_id, msgToSend)
+            bot.sendMessage(chatId, msgToSend)
