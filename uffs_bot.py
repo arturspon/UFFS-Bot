@@ -2,28 +2,12 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, date
-import telepot
 import time
+from telegram.ext import Updater, CommandHandler
 
-bot = telepot.Bot(os.environ['telegramToken'])
 URL_MENU_RU_CCO = 'https://www.uffs.edu.br/campi/chapeco/restaurante_universitario'
 
 menuCache = {}
-
-def onMsgReceived(msg):
-    msgToSend = ''
-
-    if msg['text'] == '/start':
-        msgToSend = 'Olá!\nExecute um dos comandos abaixo para continuar:\n\\cardapio - Mostra o cardápio do dia'
-    elif msg['text'] == '/cardapio':
-        if date.today() in menuCache:
-            msgToSend = menuCache[date.today()]
-        else:
-            bot.sendMessage(msg['chat']['id'], 'Aguarde enquanto baixamos o cardápio...')
-            msgToSend = formatMenuMsg(getMenu())
-    
-    if msgToSend:
-        bot.sendMessage(msg['chat']['id'], msgToSend)
 
 def getMenu():
     page = requests.get(URL_MENU_RU_CCO)
@@ -59,7 +43,28 @@ def formatMenuMsg(dirtyMenuList):
 
     return prettyMsg
 
-bot.message_loop(onMsgReceived)
+def showStartMenu(bot, update):
+    msgToSend = 'Olá!\nExecute um dos comandos abaixo para continuar:\n/cardapio - Mostra o cardápio do dia'
+    bot.sendMessage(update.message.chat_id, msgToSend)
 
-while 1:
-    time.sleep(10)
+def showCardapio(bot, update):
+    if date.today() in menuCache:
+        msgToSend = menuCache[date.today()]
+    else:
+        bot.sendMessage(update.message.chat_id, 'Aguarde enquanto baixamos o cardápio...')
+        msgToSend = formatMenuMsg(getMenu())
+    
+    if msgToSend:
+        bot.sendMessage(update.message.chat_id, msgToSend)
+
+
+def main():
+    updater = Updater(os.environ['telegramToken'])
+    dp = updater.dispatcher
+    dp.add_handler(CommandHandler('start', showStartMenu))
+    dp.add_handler(CommandHandler('cardapio', showCardapio))
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
