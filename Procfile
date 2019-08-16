@@ -1,1 +1,1 @@
-worker: python uffs_bot.py
+worker: python src/uffsBot.py
