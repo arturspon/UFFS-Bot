@@ -1,7 +1,6 @@
 import os
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
-import config
 import RuBot, BusBot
 
 ruBot = RuBot.RuBot()
