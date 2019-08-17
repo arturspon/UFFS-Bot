@@ -5,6 +5,7 @@ Um bot do Telegram para ajudar estudantes da UFFS no dia a dia.
 ## O que ele faz?
 Até o momento, as seguintes funções estão implementadas:
 * Visualização do cardápio do restaurante universitário
+* Visualização dos horários de ônibus
 
 ## Ambiente
 

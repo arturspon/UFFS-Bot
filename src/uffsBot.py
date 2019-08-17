@@ -22,7 +22,11 @@ def callHandler(bot, update):
     if update.callback_query.data == 'cardapio-ru':
         ruBot.showCardapio(bot, update)
     elif update.callback_query.data == 'onibus':
-        pass
+        busBot.selectCampus(bot, update)
+    elif update.callback_query.data[:3] == 'bus':
+        busBot.selectStartPoint(bot, update, update.callback_query.data[4:])
+    elif update.callback_query.data[:13] == 'startPointBus':
+        busBot.showSchedule(bot, update, update.callback_query.data[14:])
 
 def main():
     updater = Updater(os.environ['telegramToken'])
