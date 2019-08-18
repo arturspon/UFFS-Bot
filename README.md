@@ -6,7 +6,8 @@ Um bot do Telegram para ajudar estudantes da UFFS no dia a dia.
 Até o momento, as seguintes funções estão implementadas:  
   
 :heavy_check_mark: Visualização do cardápio do restaurante universitário  
-:heavy_check_mark: Visualização dos horários de ônibus
+:heavy_check_mark: Visualização dos horários de ônibus  
+:heavy_check_mark: Download em PDF do calendário acadêmico.
 
 ## Como utilizar
 Inicie uma nova conversa no Telegram e procure por @UFFS_Bot.
