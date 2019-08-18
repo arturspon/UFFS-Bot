@@ -7,6 +7,15 @@ class BusBot:
     }
     schedules = {}
 
+    citiesFullName = {
+        'cco': 'Chapecó',
+        'cerro': 'Cerro Largo',
+        'erechim': 'Erechim',
+        'laranjeiras': 'Laranjeiras do Sul',
+        'passofundo': 'Passo Fundo',
+        'realeza': 'Realeza'
+    }
+
     def __init__(self):
         self.loadSchedules()
 
@@ -89,19 +98,22 @@ class BusBot:
         )
 
     def showSchedule(self, bot, update, startPointAndCity):
-        try:
-            startPointAndCity = startPointAndCity.split('-')
-            startPoint = startPointAndCity[0]
-            city = startPointAndCity[1]
+        startPointAndCity = startPointAndCity.split('-')
+        startPoint = startPointAndCity[0]
+        city = startPointAndCity[1]
+        if city in self.schedules:
             bot.send_message(
                 chat_id = update.callback_query.message.chat.id,
-                text = self.formatSchedule(self.schedules[city]['week'][startPoint])
+                text = self.formatSchedule(self.schedules[city]['week'][startPoint], startPoint, city)
             )
-        except Exception as err:
-            print(err)
+        else:
+            bot.send_message(
+                chat_id = update.callback_query.message.chat.id,
+                text = 'Desculpe, ainda não há horários registrados para essa rota/cidade.'
+            )
 
-    def formatSchedule(self, scheduleList):
-        formattedText = 'Os horários de saída dos ônibus são:\n'
+    def formatSchedule(self, scheduleList, startPoint, city):
+        formattedText = 'Horários de saída dos ônibus do(a) ' + startPoint.upper() + ' em ' + self.citiesFullName[city] + ':\n'
         for schedule in scheduleList:
             formattedText += schedule + ', '         
         return formattedText[:-2] + '.\n'
