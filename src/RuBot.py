@@ -63,7 +63,7 @@ class RuBot:
             chatId = update['callback_query']['message']['chat']['id']
 
         if str(date.today().isocalendar()[1]) + campus in self.menuCache:
-            imgToSend = self.menuCache[date.today()]
+            imgToSend = self.menuCache[str(date.today().isocalendar()[1]) + campus]
         else:
             bot.sendMessage(chatId, 'Aguarde enquanto baixamos o cardápio...')
             imgToSend = self.getMenu(campus)
