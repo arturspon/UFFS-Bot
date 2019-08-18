@@ -59,12 +59,12 @@ class BusBot:
         self.schedules[city] = results
 
     def selectCampus(self, bot, update):
-        keyboard = [[telegram.InlineKeyboardButton('RU Chapecó', callback_data = 'bus-cco'),
-                telegram.InlineKeyboardButton('RU Cerro Largo', callback_data = 'bus-cerro'),
-                telegram.InlineKeyboardButton('RU Erechim', callback_data = 'bus-erechim')],
-                [telegram.InlineKeyboardButton('RU Laranjeiras', callback_data = 'bus-laranjeiras'),
-                telegram.InlineKeyboardButton('RU Passo Fundo', callback_data = 'bus-passofundo'),
-                telegram.InlineKeyboardButton('RU Realeza', callback_data = 'bus-realeza')]]
+        keyboard = [[telegram.InlineKeyboardButton('Campus Chapecó', callback_data = 'bus-cco'),
+                telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro'),
+                telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim')],
+                [telegram.InlineKeyboardButton('Campus Laranjeiras', callback_data = 'bus-laranjeiras'),
+                telegram.InlineKeyboardButton('Campus Passo Fundo', callback_data = 'bus-passofundo'),
+                telegram.InlineKeyboardButton('Campus Realeza', callback_data = 'bus-realeza')]]
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
 
         bot.editMessageText(

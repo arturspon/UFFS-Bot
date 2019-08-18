@@ -20,7 +20,9 @@ def showStartMenu(bot, update):
 
 def callHandler(bot, update):
     if update.callback_query.data == 'cardapio-ru':
-        ruBot.showCardapio(bot, update)
+        ruBot.selectCampus(bot, update)
+    elif update.callback_query.data[:2] == 'RU':
+        ruBot.showCardapio(bot, update, update.callback_query.data[3:])
     elif update.callback_query.data == 'onibus':
         busBot.selectCampus(bot, update)
     elif update.callback_query.data[:3] == 'bus':
