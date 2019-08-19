@@ -68,12 +68,22 @@ class BusBot:
         self.schedules[city] = results
 
     def selectCampus(self, bot, update):
-        keyboard = [[telegram.InlineKeyboardButton('Campus Chapecó', callback_data = 'bus-cco'),
+        keyboard = [
+            [
+                telegram.InlineKeyboardButton('Campus Chapecó', callback_data = 'bus-cco'),
                 telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro'),
-                telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim')],
-                [telegram.InlineKeyboardButton('Campus Laranjeiras', callback_data = 'bus-laranjeiras'),
+                telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim')
+            ],
+            [
+                telegram.InlineKeyboardButton('Campus Laranjeiras', callback_data = 'bus-laranjeiras'),
                 telegram.InlineKeyboardButton('Campus Passo Fundo', callback_data = 'bus-passofundo'),
-                telegram.InlineKeyboardButton('Campus Realeza', callback_data = 'bus-realeza')]]
+                telegram.InlineKeyboardButton('Campus Realeza', callback_data = 'bus-realeza')
+            ],
+            [
+                telegram.InlineKeyboardButton('⭠ Menu principal', callback_data = 'main-menu')
+            ]
+        ]
+            
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
 
         bot.editMessageText(
@@ -85,8 +95,15 @@ class BusBot:
         )
 
     def selectStartPoint(self, bot, update, city):
-        keyboard = [[telegram.InlineKeyboardButton('Terminal', callback_data = 'startPointBus-terminal-' + city),
-                telegram.InlineKeyboardButton('UFFS', callback_data = 'startPointBus-uffs-' + city)]]
+        keyboard = [
+            [
+                telegram.InlineKeyboardButton('Terminal', callback_data = 'startPointBus-terminal-' + city),
+                telegram.InlineKeyboardButton('UFFS', callback_data = 'startPointBus-uffs-' + city)
+            ],
+            [
+                telegram.InlineKeyboardButton('⭠ Menu principal', callback_data = 'main-menu')
+            ]
+        ]
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
 
         bot.editMessageText(

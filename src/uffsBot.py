@@ -8,25 +8,31 @@ busBot = BusBot.BusBot()
 calendarBot = CalendarBot.CalendarBot()
 
 def showStartMenu(bot, update):
-    msgToSend = 'Olá!\nSelecione uma opção para continuar...'
-
-    keyboard = [
-        [
-            telegram.InlineKeyboardButton('Cardápio RU', callback_data = 'cardapio-ru'),
-            telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'onibus')
-        ],
-        [
-            telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
-        ]
-    ]
-
-    reply_markup = telegram.InlineKeyboardMarkup(keyboard)
-
     bot.send_message(
         chat_id = update.message.chat_id,
-        text = msgToSend,
-        reply_markup = reply_markup
+        text = 'Olá!\nSelecione uma opção para continuar...',
+        reply_markup = getMainMenuMarkup()
     )
+
+def showStartMenuInExistingMsg(bot, update):
+    bot.editMessageText(
+        message_id = update.callback_query.message.message_id,
+        chat_id = update.callback_query.message.chat.id,
+        text = 'Olá!\nSelecione uma opção para continuar...',
+        reply_markup = getMainMenuMarkup()
+    )
+
+def getMainMenuMarkup():
+    keyboard = [
+            [
+                telegram.InlineKeyboardButton('Cardápio RU', callback_data = 'cardapio-ru'),
+                telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'onibus')
+            ],
+            [
+                telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
+            ]
+        ]
+    return telegram.InlineKeyboardMarkup(keyboard)
 
 def callHandler(bot, update):
     if update.callback_query.data == 'cardapio-ru':
@@ -41,6 +47,8 @@ def callHandler(bot, update):
         busBot.showSchedule(bot, update, update.callback_query.data[14:])
     elif update.callback_query.data == 'academic-calendar':
         calendarBot.getCalendar(bot, update)
+    elif update.callback_query.data == 'main-menu':
+        showStartMenuInExistingMsg(bot, update)
 
 def main():
     updater = Updater(os.environ['telegramToken'])

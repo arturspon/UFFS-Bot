@@ -40,11 +40,20 @@ class RuBot:
         return imgUrl
 
     def selectCampus(self, bot, update):
-        keyboard = [[telegram.InlineKeyboardButton('RU Chapecó', callback_data = 'RU-chapeco'),
+        keyboard = [
+            [
+                telegram.InlineKeyboardButton('RU Chapecó', callback_data = 'RU-chapeco'),
                 telegram.InlineKeyboardButton('RU Cerro Largo', callback_data = 'RU-cerro-largo'),
-                telegram.InlineKeyboardButton('RU Erechim', callback_data = 'RU-erechim')],
-                [telegram.InlineKeyboardButton('RU Laranjeiras', callback_data = 'RU-laranjeiras-do-sul'),
-                telegram.InlineKeyboardButton('RU Realeza', callback_data = 'RU-realeza')]]
+                telegram.InlineKeyboardButton('RU Erechim', callback_data = 'RU-erechim')
+            ],
+            [
+                telegram.InlineKeyboardButton('RU Laranjeiras', callback_data = 'RU-laranjeiras-do-sul'),
+                telegram.InlineKeyboardButton('RU Realeza', callback_data = 'RU-realeza')
+            ],
+            [
+                telegram.InlineKeyboardButton('⭠ Menu principal', callback_data = 'main-menu')
+            ]
+        ]
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
 
         bot.editMessageText(
