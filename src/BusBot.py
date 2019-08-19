@@ -3,7 +3,9 @@ import telegram
 class BusBot:
     assetFolderPath = 'assets/BusBot/'
     scheduleFiles = {
-        'cco': 'scheduleCCO.txt'
+        'cco': 'scheduleCCO.txt',
+        'cerro': 'scheduleCL.txt',
+        'erechim': 'scheduleERE.txt'
     }
     schedules = {}
 
