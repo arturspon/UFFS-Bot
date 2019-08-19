@@ -37,6 +37,7 @@ class BusBot:
             fromTerminal = None
             for line in file:
                 line = line.rstrip("\n\r")
+                line = line.strip()
                 if line == 'semana':
                     isWeek = True
                     fromTerminal = None
@@ -64,8 +65,7 @@ class BusBot:
                         else:
                             results['sat']['uffs'].append(str(line))
 
-
-        self.schedules[city] = results
+            self.schedules[city] = results
 
     def selectCampus(self, bot, update):
         keyboard = [
