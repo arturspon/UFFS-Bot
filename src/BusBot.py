@@ -73,11 +73,13 @@ class BusBot:
         keyboard = [
             [
                 telegram.InlineKeyboardButton('Campus Chapecó', callback_data = 'bus-cco'),
-                telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro'),
-                telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim')
+                telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro')                
             ],
             [
-                telegram.InlineKeyboardButton('Campus Laranjeiras', callback_data = 'bus-laranjeiras'),
+                telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim'),
+                telegram.InlineKeyboardButton('Campus Laranjeiras', callback_data = 'bus-laranjeiras')
+            ],
+            [
                 telegram.InlineKeyboardButton('Campus Passo Fundo', callback_data = 'bus-passofundo'),
                 telegram.InlineKeyboardButton('Campus Realeza', callback_data = 'bus-realeza')
             ],
