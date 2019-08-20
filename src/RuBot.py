@@ -80,3 +80,68 @@ class RuBot:
 
         if imgToSend:
             bot.send_photo(chat_id=chatId, photo=imgToSend)
+
+    def subToPeriodicMenu(self, bot, update):
+        with sqlite3.connect("users.db") as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("INSERT INTO users VALUES (?,?,?);", (update.message.chat_id, "cco", "weekly"))
+                conn.commit()
+                message = "Você receberá o cardápio periodicamente"
+
+            except Exception as e:
+                print(e)
+                message = "Você já está recebendo o cardápio"
+
+            bot.send_message(
+                chat_id=update.message.chat_id,
+                text=message
+            )
+            
+    def unsubToPeriodicMenu(self, bot, update):
+        with sqlite3.connect("users.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE users SET period =  ? WHERE chat_id = ?;", ("",update.message.chat_id))
+            conn.commit()
+
+            message = "Você não receberá mais o cardapio periodicamente"
+
+
+            bot.send_message(
+                chat_id=update.message.chat_id,
+                text=message
+            )
+
+    def sendMenuToSubs(self, bot, period):
+        with sqlite3.connect("users.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE period = ?;", (period,))
+            for user in cursor.fetchall():
+                chat_id = user[0]
+                campi = user[1]
+                try: #Tenta enviar mensagem para o chat_id cadastrado
+                    bot.send_message(
+                        chat_id=chat_id,
+                        text=campi #aqui vai o cardapio de acordo com o campus
+                    )
+                except Exception as e: #Se nao der, o chat foi encerrado, então deletamos o usuario da base
+                    cursor.execute("DELETE FROM users WHERE chat_id = ?;", (chat_id,))
+            conn.commit()
+
+    def sendMenuPeriodically(self, bot):
+        with sqlite3.connect("users.db") as conn:
+            cursor = conn.cursor()
+            # Cria tabela para armazenar os chat_id dos usuarios possibilitando o envio de mensagens sem o chamado de comandos
+            # Campi armazena o campus do qual o usuario deseja saber o cardapio
+            # Period armazena se ira receber o cardapio semanalmente ou diariamente ou não receber
+            cursor.execute("CREATE TABLE IF NOT EXISTS users (chat_id INTEGER PRIMARY KEY, campi TEXT, period TEXT)")
+            conn.commit()
+
+        #Todo dias as 10:00 manda o cardaio para os cadastrados
+        schedule.every().day.at("10:00").do(self.sendMenuToSubs, bot, "daily")
+        #Toda segunda as 9:00 manda o cardapio para os cadastrados
+        schedule.every().monday.at("09:00").do(self.sendMenuToSubs, bot, "weekly")
+
+        while True:
+            schedule.run_pending()
+            time.sleep(1)

@@ -10,6 +10,10 @@ busBot = BusBot.BusBot()
 calendarBot = CalendarBot.CalendarBot()
 
 def showStartMenu(bot, update):
+    with sqlite3.connect("users.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT users WHERE chat_id = ?;", (update.message.chat_id,))
+        
     bot.send_message(
         chat_id = update.message.chat_id,
         text = 'Olá!\nSelecione uma opção para continuar...',
@@ -58,11 +62,13 @@ def callHandler(bot, update):
         showStartMenuInExistingMsg(bot, update)
 
 def main():
-    updater = Updater(telegramToken)
+    bot =  telegram.Bot(telegramToken)
+    updater = Updater(bot=bot)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start', showStartMenu))
-    dp.add_handler(CommandHandler('cal_academico', calendarBot.getCalendar))
     dp.add_handler(CallbackQueryHandler(callHandler))
+    thread = Thread(target = ruBot.sendMenuPeriodically, args = (bot,))
+    thread.start()
     updater.start_polling()
     updater.idle()
 
