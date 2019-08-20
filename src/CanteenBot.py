@@ -1,9 +1,3 @@
-import requests
-from bs4 import BeautifulSoup
-from datetime import datetime, date
-import time
-import os
-import re
 import telegram
 
 class CanteenBot:
