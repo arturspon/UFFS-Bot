@@ -1,10 +1,11 @@
 import os
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
-import RuBot, BusBot, CalendarBot
+import RuBot, BusBot, CalendarBot, CanteenBot
 from conf.settings import telegramToken
 
 ruBot = RuBot.RuBot()
+canteenBot = CanteenBot.CanteenBot()
 busBot = BusBot.BusBot()
 calendarBot = CalendarBot.CalendarBot()
 
@@ -26,21 +27,26 @@ def showStartMenuInExistingMsg(bot, update):
 def getMainMenuMarkup():
     keyboard = [
         [
-            telegram.InlineKeyboardButton('Cardápio RU', callback_data = 'cardapio-ru'),
-            telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'onibus')
+            telegram.InlineKeyboardButton('Cardápio RU', callback_data = 'menu-ru'),
+            telegram.InlineKeyboardButton('Cardápio Cantina', callback_data = 'menu-canteen')
         ],
         [
+            telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'bus-schedules'),
             telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
         ]
     ]
     return telegram.InlineKeyboardMarkup(keyboard)
 
 def callHandler(bot, update):
-    if update.callback_query.data == 'cardapio-ru':
+    if update.callback_query.data == 'menu-ru':
         ruBot.selectCampus(bot, update)
     elif update.callback_query.data[:2] == 'RU':
         ruBot.showCardapio(bot, update, update.callback_query.data[3:])
-    elif update.callback_query.data == 'onibus':
+    elif update.callback_query.data == 'menu-canteen':
+        canteenBot.selectCampus(bot, update)
+    elif update.callback_query.data[:7] == 'canteen':
+        canteenBot.showCardapio(bot, update)
+    elif update.callback_query.data == 'bus-schedules':
         busBot.selectCampus(bot, update)
     elif update.callback_query.data[:3] == 'bus':
         busBot.selectStartPoint(bot, update, update.callback_query.data[4:])
