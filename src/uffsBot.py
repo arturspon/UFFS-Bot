@@ -1,13 +1,14 @@
 import os
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
-import RuBot, BusBot, CalendarBot, CanteenBot
+import RuBot, BusBot, CalendarBot, CanteenBot, EventsBot
 from conf.settings import telegramToken
 
 ruBot = RuBot.RuBot()
 canteenBot = CanteenBot.CanteenBot()
 busBot = BusBot.BusBot()
 calendarBot = CalendarBot.CalendarBot()
+eventsBot = EventsBot.EventsBot()
 
 def showStartMenu(bot, update):
     bot.send_message(
@@ -33,6 +34,9 @@ def getMainMenuMarkup():
         [
             telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'bus-schedules'),
             telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
+        ],
+        [
+            telegram.InlineKeyboardButton('Próximos Eventos', callback_data = 'events-schedules')
         ]
     ]
     return telegram.InlineKeyboardMarkup(keyboard)
@@ -54,6 +58,8 @@ def callHandler(bot, update):
         busBot.showSchedule(bot, update, update.callback_query.data[14:])
     elif update.callback_query.data == 'academic-calendar':
         calendarBot.getCalendar(bot, update)
+    elif update.callback_query.data == 'events-schedules':
+        eventsBot.showEvents(bot, update)
     elif update.callback_query.data == 'main-menu':
         showStartMenuInExistingMsg(bot, update)
 
