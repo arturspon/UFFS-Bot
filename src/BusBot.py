@@ -82,7 +82,7 @@ class BusBot:
                 telegram.InlineKeyboardButton('Campus Realeza', callback_data = 'bus-realeza')
             ],
             [
-                telegram.InlineKeyboardButton('⭠ Menu principal', callback_data = 'main-menu')
+                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
             
@@ -103,7 +103,7 @@ class BusBot:
                 telegram.InlineKeyboardButton('UFFS', callback_data = 'startPointBus-uffs-' + city)
             ],
             [
-                telegram.InlineKeyboardButton('⭠ Menu principal', callback_data = 'main-menu')
+                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
