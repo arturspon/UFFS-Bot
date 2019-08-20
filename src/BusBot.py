@@ -3,7 +3,9 @@ import telegram
 class BusBot:
     assetFolderPath = 'assets/BusBot/'
     scheduleFiles = {
-        'cco': 'scheduleCCO.txt'
+        'cco': 'scheduleCCO.txt',
+        'cerro': 'scheduleCL.txt',
+        'erechim': 'scheduleERE.txt'
     }
     schedules = {}
 
@@ -37,6 +39,7 @@ class BusBot:
             fromTerminal = None
             for line in file:
                 line = line.rstrip("\n\r")
+                line = line.strip()
                 if line == 'semana':
                     isWeek = True
                     fromTerminal = None
@@ -64,23 +67,24 @@ class BusBot:
                         else:
                             results['sat']['uffs'].append(str(line))
 
-
-        self.schedules[city] = results
+            self.schedules[city] = results
 
     def selectCampus(self, bot, update):
         keyboard = [
             [
                 telegram.InlineKeyboardButton('Campus Chapecó', callback_data = 'bus-cco'),
-                telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro'),
-                telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim')
+                telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro')                
             ],
             [
-                telegram.InlineKeyboardButton('Campus Laranjeiras', callback_data = 'bus-laranjeiras'),
+                telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim'),
+                telegram.InlineKeyboardButton('Campus Laranjeiras', callback_data = 'bus-laranjeiras')
+            ],
+            [
                 telegram.InlineKeyboardButton('Campus Passo Fundo', callback_data = 'bus-passofundo'),
                 telegram.InlineKeyboardButton('Campus Realeza', callback_data = 'bus-realeza')
             ],
             [
-                telegram.InlineKeyboardButton('⭠ Menu principal', callback_data = 'main-menu')
+                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
             
@@ -101,7 +105,7 @@ class BusBot:
                 telegram.InlineKeyboardButton('UFFS', callback_data = 'startPointBus-uffs-' + city)
             ],
             [
-                telegram.InlineKeyboardButton('⭠ Menu principal', callback_data = 'main-menu')
+                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)

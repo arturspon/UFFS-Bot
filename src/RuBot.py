@@ -51,7 +51,7 @@ class RuBot:
                 telegram.InlineKeyboardButton('RU Realeza', callback_data = 'RU-realeza')
             ],
             [
-                telegram.InlineKeyboardButton('⭠ Menu principal', callback_data = 'main-menu')
+                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)

@@ -24,14 +24,14 @@ def showStartMenuInExistingMsg(bot, update):
 
 def getMainMenuMarkup():
     keyboard = [
-            [
-                telegram.InlineKeyboardButton('Cardápio RU', callback_data = 'cardapio-ru'),
-                telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'onibus')
-            ],
-            [
-                telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
-            ]
+        [
+            telegram.InlineKeyboardButton('Cardápio RU', callback_data = 'cardapio-ru'),
+            telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'onibus')
+        ],
+        [
+            telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
         ]
+    ]
     return telegram.InlineKeyboardMarkup(keyboard)
 
 def callHandler(bot, update):
