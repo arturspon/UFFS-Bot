@@ -5,6 +5,7 @@ import time
 import os
 import re
 import telegram
+from conf.settings import htciId, htciKey
 
 class RuBot:
     menuCache = {}
@@ -32,7 +33,7 @@ class RuBot:
         else:
             html = str(week[1]) + str(table[1])
 
-        img = requests.post('https://hcti.io/v1/image', data = {'HTML': html}, auth=(os.environ['htciId'], os.environ['htciKey']))
+        img = requests.post('https://hcti.io/v1/image', data = {'HTML': html}, auth=(htciId, htciKey))
         imgUrl = img.text.split('"')[3]
 
         self.menuCache[str(date.today().isocalendar()[1]) + campus] = imgUrl
@@ -76,6 +77,6 @@ class RuBot:
         else:
             bot.sendMessage(chatId, 'Aguarde enquanto baixamos o cardápio...')
             imgToSend = self.getMenu(campus)
-        
+
         if imgToSend:
             bot.send_photo(chat_id=chatId, photo=imgToSend)

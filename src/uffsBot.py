@@ -2,6 +2,7 @@ import os
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
 import RuBot, BusBot, CalendarBot
+from conf.settings import telegramToken
 
 ruBot = RuBot.RuBot()
 busBot = BusBot.BusBot()
@@ -51,13 +52,13 @@ def callHandler(bot, update):
         showStartMenuInExistingMsg(bot, update)
 
 def main():
-    updater = Updater(os.environ['telegramToken'])
+    updater = Updater(telegramToken)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start', showStartMenu))
     dp.add_handler(CommandHandler('cal_academico', calendarBot.getCalendar))
     dp.add_handler(CallbackQueryHandler(callHandler))
     updater.start_polling()
-    updater.idle()    
+    updater.idle()
 
 if __name__ == '__main__':
     main()
