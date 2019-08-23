@@ -3,6 +3,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
 import RuBot, BusBot, CalendarBot, CanteenBot
 from conf.settings import telegramToken
+import threading
 
 ruBot = RuBot.RuBot()
 canteenBot = CanteenBot.CanteenBot()
@@ -10,10 +11,6 @@ busBot = BusBot.BusBot()
 calendarBot = CalendarBot.CalendarBot()
 
 def showStartMenu(bot, update):
-    with sqlite3.connect("users.db") as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT users WHERE chat_id = ?;", (update.message.chat_id,))
-        
     bot.send_message(
         chat_id = update.message.chat_id,
         text = 'Olá!\nSelecione uma opção para continuar...',
@@ -37,6 +34,9 @@ def getMainMenuMarkup():
         [
             telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'bus-schedules'),
             telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
+        ],
+        [
+            telegram.InlineKeyboardButton('Cardápio Automático', callback_data = 'auto-menu')
         ]
     ]
     return telegram.InlineKeyboardMarkup(keyboard)
@@ -46,6 +46,8 @@ def callHandler(bot, update):
         ruBot.selectCampus(bot, update)
     elif update.callback_query.data[:2] == 'RU':
         ruBot.showCardapio(bot, update, update.callback_query.data[3:])
+    elif update.callback_query.data == 'auto-menu':
+        ruBot.selectPeriod(bot, update)
     elif update.callback_query.data == 'menu-canteen':
         canteenBot.selectCampus(bot, update)
     elif update.callback_query.data[:7] == 'canteen':
@@ -66,8 +68,11 @@ def main():
     updater = Updater(bot=bot)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start', showStartMenu))
+    dp.add_handler(CommandHandler('auto', ruBot.subToPeriodicMenu))
+    dp.add_handler(CommandHandler('autoCancel', ruBot.unsubToPeriodicMenu))
+    dp.add_handler(CommandHandler('cal_academico', calendarBot.getCalendar))
     dp.add_handler(CallbackQueryHandler(callHandler))
-    thread = Thread(target = ruBot.sendMenuPeriodically, args = (bot,))
+    thread = threading.Thread(target = ruBot.sendMenuPeriodically, args = (bot,))
     thread.start()
     updater.start_polling()
     updater.idle()
