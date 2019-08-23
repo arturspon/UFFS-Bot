@@ -44,22 +44,43 @@ def getMainMenuMarkup():
 def callHandler(bot, update):
     if update.callback_query.data == 'menu-ru':
         ruBot.selectCampus(bot, update)
+
     elif update.callback_query.data[:2] == 'RU':
         ruBot.showCardapio(bot, update, update.callback_query.data[3:])
+
+    elif update.callback_query.data[:2] == 'unsub':
+        ruBot.unsubToPeriodicMenu(bot, update)
+
+    elif update.callback_query.data[:4] == 'AUTO':
+        ruBot.subToPeriodicMenu(bot, update, update.callback_query.data)
+
     elif update.callback_query.data == 'auto-menu':
         ruBot.selectPeriod(bot, update)
+
+    elif update.callback_query.data == 'daily':
+        ruBot.selectCampusAuto(bot, update, 'daily')
+
+    elif update.callback_query.data == 'weekly':
+        ruBot.selectCampusAuto(bot, update, 'weekly')
+
     elif update.callback_query.data == 'menu-canteen':
         canteenBot.selectCampus(bot, update)
+
     elif update.callback_query.data[:7] == 'canteen':
         canteenBot.showCardapio(bot, update)
+
     elif update.callback_query.data == 'bus-schedules':
         busBot.selectCampus(bot, update)
+
     elif update.callback_query.data[:3] == 'bus':
         busBot.selectStartPoint(bot, update, update.callback_query.data[4:])
+
     elif update.callback_query.data[:13] == 'startPointBus':
         busBot.showSchedule(bot, update, update.callback_query.data[14:])
+
     elif update.callback_query.data == 'academic-calendar':
         calendarBot.getCalendar(bot, update)
+
     elif update.callback_query.data == 'main-menu':
         showStartMenuInExistingMsg(bot, update)
 

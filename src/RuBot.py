@@ -70,6 +70,34 @@ class RuBot:
             reply_markup = replyMarkup
         )
 
+    def selectCampusAuto(self, bot, update, period):
+        try:
+            keyboard = [
+                [
+                    telegram.InlineKeyboardButton('Chapecó', callback_data = 'AUTO/'+period+'/chapeco'),
+                    telegram.InlineKeyboardButton('Cerro Largo', callback_data = 'AUTO/'+period+'/cerro-largo'),
+                    telegram.InlineKeyboardButton('Erechim', callback_data = 'AUTO/'+period+'/erechim')
+                ],
+                [
+                    telegram.InlineKeyboardButton('Laranjeiras', callback_data = 'AUTO/'+period+'/laranjeiras-do-sul'),
+                    telegram.InlineKeyboardButton('Realeza', callback_data = 'AUTO/'+period+'/realeza')
+                ],
+                [
+                    telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
+                ]
+            ]
+            replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
+
+            bot.editMessageText(
+                message_id = update.callback_query.message.message_id,
+                chat_id = update.callback_query.message.chat.id,
+                text = 'Selecione o campus:',
+                parse_mode = 'HTML',
+                reply_markup = replyMarkup
+            )
+        except Exception as e:
+            print("isInDataBase: "+str(e)+"\n")
+
     def showCardapio(self, bot, update, campus):
         chatId = None
         try:
@@ -100,11 +128,15 @@ class RuBot:
         except Exception as e:
             print("isInDataBase: "+str(e)+"\n")
 
-    def subToPeriodicMenu(self, bot, update):#, campus, period):
+    def subToPeriodicMenu(self, bot, update, callback_data):#, campus, period):
         try:
-            campus = 'chapeco'
-            period = 'daily'
-            chat_id = update.message.chat_id
+            callback_data=callback_data.split('/')
+            campus = callback_data[1]
+            period = callback_data[2]
+            try:
+                chat_id = update.message.chat_id
+            except:
+                chat_id = update['callback_query']['message']['chat']['id']
             if self.isInDataBase(chat_id):
                 query = "UPDATE users SET campus = '"+campus+"', period = '"+period+"' WHERE chat_id = "+str(chat_id)+';'
             else:
@@ -126,7 +158,10 @@ class RuBot:
 
     def unsubToPeriodicMenu(self, bot, update):
         try:
-            chat_id = update.message.chat_id
+            try:
+                chat_id = update.message.chat_id
+            except:
+                chat_id = update['callback_query']['message']['chat']['id']
             query = "UPDATE users SET period = 'none' WHERE chat_id = "+str(chat_id)+';'
             conn = sqlite3.connect('users.db')
             cursor = conn.cursor()
@@ -194,6 +229,9 @@ class RuBot:
             [
                 telegram.InlineKeyboardButton('Diário', callback_data = 'daily'),
                 telegram.InlineKeyboardButton('Semanal', callback_data = 'weekly')
+            ],
+            [
+                telegram.InlineKeyboardButton('Desativar cardapio automático', callback_data = 'unsub')
             ]
         ]
 
