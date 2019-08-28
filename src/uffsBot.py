@@ -48,7 +48,7 @@ def callHandler(bot, update):
     elif update.callback_query.data[:2] == 'RU':
         ruBot.showCardapio(bot, update, update.callback_query.data[3:])
 
-    elif update.callback_query.data[:2] == 'unsub':
+    elif update.callback_query.data == 'unsub':
         ruBot.unsubToPeriodicMenu(bot, update)
 
     elif update.callback_query.data[:4] == 'AUTO':

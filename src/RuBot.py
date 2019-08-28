@@ -131,8 +131,8 @@ class RuBot:
     def subToPeriodicMenu(self, bot, update, callback_data):#, campus, period):
         try:
             callback_data=callback_data.split('/')
-            campus = callback_data[1]
-            period = callback_data[2]
+            period = callback_data[1]
+            campus = callback_data[2]
             try:
                 chat_id = update.message.chat_id
             except:
@@ -257,9 +257,13 @@ class RuBot:
             conn.close()
 
             #Todo dias as 10:00 manda o cardaio para os cadastrados
-            schedule.every().minute.do(self.sendMenuToSubs, bot, "daily")
+            schedule.every().monday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
+            schedule.every().tuesday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
+            schedule.every().wednesday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
+            schedule.every().thursday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
+            schedule.every().friday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             #Toda segunda as 9:00 manda o cardapio para os cadastrados
-            schedule.every().minute.do(self.sendMenuToSubs, bot, "weekly")
+            schedule.every().sunday.at('10:00').do(self.sendMenuToSubs, bot, "weekly")
 
             while True:
                 schedule.run_pending()
