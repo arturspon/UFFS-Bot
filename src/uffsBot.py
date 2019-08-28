@@ -91,7 +91,12 @@ def callHandler(bot, update):
     elif update.callback_query.data == 'main-menu':
         showStartMenuInExistingMsg(bot, update)
 
+def downloadNeededFiles():
+    calendarBot.downloadCalendar()
+
 def main():
+    downloadNeededFiles()
+    
     bot =  telegram.Bot(telegramToken)
     updater = Updater(bot=bot)
     dp = updater.dispatcher
@@ -104,6 +109,7 @@ def main():
     thread.start()
     updater.start_polling()
     updater.idle()
+
 
 if __name__ == '__main__':
     main()
