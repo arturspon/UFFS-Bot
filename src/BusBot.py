@@ -93,8 +93,8 @@ class BusBot:
         bot.editMessageText(
             message_id = update.callback_query.message.message_id,
             chat_id = update.callback_query.message.chat.id,
-            text = 'Selecione o campus:',
-            parse_mode = 'HTML',
+            text = '*Selecione o campus:*',
+            parse_mode = 'Markdown',
             reply_markup = replyMarkup
         )
 
@@ -113,8 +113,8 @@ class BusBot:
         bot.editMessageText(
             message_id = update.callback_query.message.message_id,
             chat_id = update.callback_query.message.chat.id,
-            text = 'Selecione o ponto de partida:',
-            parse_mode = 'HTML',
+            text = '*Selecione o ponto de partida:*',
+            parse_mode = 'Markdown',
             reply_markup = replyMarkup
         )
 
@@ -125,16 +125,18 @@ class BusBot:
         if city in self.schedules:
             bot.send_message(
                 chat_id = update.callback_query.message.chat.id,
-                text = self.formatSchedule(self.schedules[city]['week'][startPoint], startPoint, city)
+                text = self.formatSchedule(self.schedules[city]['week'][startPoint], startPoint, city),
+                parse_mode = 'Markdown'
             )
         else:
             bot.send_message(
                 chat_id = update.callback_query.message.chat.id,
-                text = 'Desculpe, ainda não há horários registrados para essa rota/cidade.'
+                text = '*Desculpe, ainda não há horários registrados para essa rota/cidade.*',
+                parse_mode = 'Markdown'
             )
 
     def formatSchedule(self, scheduleList, startPoint, city):
-        formattedText = 'Horários de saída dos ônibus do(a) ' + startPoint.upper() + ' em ' + self.citiesFullName[city] + ':\n'
+        formattedText = '*Horários de saída dos ônibus do(a) ' + startPoint.upper() + ' em ' + self.citiesFullName[city] + ':*\n'
         for schedule in scheduleList:
             formattedText += schedule + ', '         
         return formattedText[:-2] + '.\n'

@@ -15,7 +15,8 @@ class CalendarBot:
 
         bot.sendMessage(
             chatId,
-            'Só um segundo...'
+            '*Só um segundo...*',
+            parse_mode = 'Markdown'
         )
 
         if(self.downloadCalendar()):
@@ -26,7 +27,8 @@ class CalendarBot:
         else:
             bot.sendMessage(
                 chatId,
-                'Desculpe, não foi possível baixar o calendário, tente novamente mais tarde.'
+                '*Desculpe, não foi possível baixar o calendário, tente novamente mais tarde.*',
+                parse_mode = 'Markdown'
             )
 
     def downloadCalendar(self):
