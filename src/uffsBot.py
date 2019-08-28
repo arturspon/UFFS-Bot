@@ -3,6 +3,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
 import RuBot, BusBot, CalendarBot, CanteenBot, EventsBot, DateBot
 from conf.settings import telegramToken
+import threading
 
 ruBot = RuBot.RuBot()
 canteenBot = CanteenBot.CanteenBot()
@@ -37,6 +38,7 @@ def getMainMenuMarkup():
             telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
         ],
         [
+            telegram.InlineKeyboardButton('Cardápio Automático', callback_data = 'auto-menu'),
             telegram.InlineKeyboardButton('Próximos Eventos', callback_data = 'events-schedules'),
             telegram.InlineKeyboardButton('Datas Importantes', callback_data = 'academic-date')
         ]
@@ -46,18 +48,40 @@ def getMainMenuMarkup():
 def callHandler(bot, update):
     if update.callback_query.data == 'menu-ru':
         ruBot.selectCampus(bot, update)
+
     elif update.callback_query.data[:2] == 'RU':
         ruBot.showCardapio(bot, update, update.callback_query.data[3:])
+
+    elif update.callback_query.data == 'unsub':
+        ruBot.unsubToPeriodicMenu(bot, update)
+
+    elif update.callback_query.data[:4] == 'AUTO':
+        ruBot.subToPeriodicMenu(bot, update, update.callback_query.data)
+
+    elif update.callback_query.data == 'auto-menu':
+        ruBot.selectPeriod(bot, update)
+
+    elif update.callback_query.data == 'daily':
+        ruBot.selectCampusAuto(bot, update, 'daily')
+
+    elif update.callback_query.data == 'weekly':
+        ruBot.selectCampusAuto(bot, update, 'weekly')
+
     elif update.callback_query.data == 'menu-canteen':
         canteenBot.selectCampus(bot, update)
+
     elif update.callback_query.data[:7] == 'canteen':
         canteenBot.showCardapio(bot, update)
+
     elif update.callback_query.data == 'bus-schedules':
         busBot.selectCampus(bot, update)
+
     elif update.callback_query.data[:3] == 'bus':
         busBot.selectStartPoint(bot, update, update.callback_query.data[4:])
+
     elif update.callback_query.data[:13] == 'startPointBus':
         busBot.showSchedule(bot, update, update.callback_query.data[14:])
+
     elif update.callback_query.data == 'academic-calendar':
         calendarBot.getCalendar(bot, update)
     elif update.callback_query.data == 'events-schedules':
@@ -72,12 +96,17 @@ def downloadNeededFiles():
 
 def main():
     downloadNeededFiles()
-
-    updater = Updater(telegramToken)
+    
+    bot =  telegram.Bot(telegramToken)
+    updater = Updater(bot=bot)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start', showStartMenu))
+    dp.add_handler(CommandHandler('auto', ruBot.subToPeriodicMenu))
+    dp.add_handler(CommandHandler('autoCancel', ruBot.unsubToPeriodicMenu))
     dp.add_handler(CommandHandler('cal_academico', calendarBot.getCalendar))
     dp.add_handler(CallbackQueryHandler(callHandler))
+    thread = threading.Thread(target = ruBot.sendMenuPeriodically, args = (bot,))
+    thread.start()
     updater.start_polling()
     updater.idle()
 
