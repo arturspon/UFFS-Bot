@@ -15,7 +15,8 @@ dateBot = DateBot.DateBot()
 def showStartMenu(bot, update):
     bot.send_message(
         chat_id = update.message.chat_id,
-        text = 'Olá!\nSelecione uma opção para continuar...',
+        text = '*Olá!\nSelecione uma opção para continuar...*',
+        parse_mode = 'Markdown',
         reply_markup = getMainMenuMarkup()
     )
 
@@ -23,7 +24,8 @@ def showStartMenuInExistingMsg(bot, update):
     bot.editMessageText(
         message_id = update.callback_query.message.message_id,
         chat_id = update.callback_query.message.chat.id,
-        text = 'Olá!\nSelecione uma opção para continuar...',
+        text = '*Olá!\nSelecione uma opção para continuar...*',
+        parse_mode = 'Markdown',
         reply_markup = getMainMenuMarkup()
     )
 
@@ -86,8 +88,14 @@ def callHandler(bot, update):
         calendarBot.getCalendar(bot, update)
     elif update.callback_query.data == 'events-schedules':
         eventsBot.showEvents(bot, update)
+
+
     elif update.callback_query.data == 'academic-date':
-        dateBot.loadDates(bot, update)
+        dateBot.selectTerm(bot, update)
+    elif update.callback_query.data[:4] == 'date':
+        dateBot.searchTerm(bot, update, update.callback_query.data[5:])
+
+
     elif update.callback_query.data == 'main-menu':
         showStartMenuInExistingMsg(bot, update)
 
