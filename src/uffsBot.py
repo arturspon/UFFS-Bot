@@ -1,6 +1,7 @@
 import os
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
+from Utils import Utils
 import RuBot, BusBot, CalendarBot, CanteenBot, EventsBot, DateBot
 from conf.settings import telegramToken
 import threading
@@ -11,43 +12,6 @@ busBot = BusBot.BusBot()
 calendarBot = CalendarBot.CalendarBot()
 eventsBot = EventsBot.EventsBot()
 dateBot = DateBot.DateBot()
-
-def showStartMenu(bot, update):
-    bot.send_message(
-        chat_id = update.message.chat_id,
-        text = '*Olá!\nSelecione uma opção para continuar...*',
-        parse_mode = 'Markdown',
-        reply_markup = getMainMenuMarkup()
-    )
-
-def showStartMenuInExistingMsg(bot, update):
-    bot.editMessageText(
-        message_id = update.callback_query.message.message_id,
-        chat_id = update.callback_query.message.chat.id,
-        text = '*Olá!\nSelecione uma opção para continuar...*',
-        parse_mode = 'Markdown',
-        reply_markup = getMainMenuMarkup()
-    )
-
-def getMainMenuMarkup():
-    keyboard = [
-        [
-            telegram.InlineKeyboardButton('Cardápio RU', callback_data = 'menu-ru'),
-            telegram.InlineKeyboardButton('Cardápio Cantina', callback_data = 'menu-canteen')
-        ],
-        [
-            telegram.InlineKeyboardButton('Horário ônibus', callback_data = 'bus-schedules'),
-            telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
-        ],
-        [
-            telegram.InlineKeyboardButton('Próximos Eventos', callback_data = 'events-schedules'),
-            telegram.InlineKeyboardButton('Datas Importantes', callback_data = 'academic-date')
-        ],
-        [
-            telegram.InlineKeyboardButton('Cardápio Automático', callback_data = 'auto-menu')
-        ]
-    ]
-    return telegram.InlineKeyboardMarkup(keyboard)
 
 def callHandler(bot, update):
     if update.callback_query.data == 'menu-ru':
@@ -99,7 +63,7 @@ def callHandler(bot, update):
 
 
     elif update.callback_query.data == 'main-menu':
-        showStartMenuInExistingMsg(bot, update)
+        Utils.showStartMenuInExistingMsg(bot, update)
 
 def downloadNeededFiles():
     calendarBot.downloadCalendar()
@@ -110,7 +74,7 @@ def main():
     bot =  telegram.Bot(telegramToken)
     updater = Updater(bot=bot)
     dp = updater.dispatcher
-    dp.add_handler(CommandHandler('start', showStartMenu))
+    dp.add_handler(CommandHandler('start', Utils.showStartMenu))
     dp.add_handler(CommandHandler('auto', ruBot.subToPeriodicMenu))
     dp.add_handler(CommandHandler('autoCancel', ruBot.unsubToPeriodicMenu))
     dp.add_handler(CommandHandler('cal_academico', calendarBot.getCalendar))

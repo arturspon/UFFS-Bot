@@ -8,6 +8,7 @@ import telegram
 from conf.settings import htciId, htciKey
 import schedule
 import sqlite3
+from Utils import Utils
 
 class RuBot:
     menuCache = {}
@@ -152,6 +153,7 @@ class RuBot:
                 chat_id=chat_id,
                 text='Cardápio automático ativado'
             )
+            Utils.showStartMenuInExistingMsg(bot, update)
         except Exception as e:
             print("subToPeriodicMenu: "+str(e)+"\n")
 
