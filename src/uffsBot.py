@@ -40,9 +40,11 @@ def getMainMenuMarkup():
             telegram.InlineKeyboardButton('Calendário acadêmico', callback_data = 'academic-calendar')
         ],
         [
-            telegram.InlineKeyboardButton('Cardápio Automático', callback_data = 'auto-menu'),
             telegram.InlineKeyboardButton('Próximos Eventos', callback_data = 'events-schedules'),
             telegram.InlineKeyboardButton('Datas Importantes', callback_data = 'academic-date')
+        ],
+        [
+            telegram.InlineKeyboardButton('Cardápio Automático', callback_data = 'auto-menu')
         ]
     ]
     return telegram.InlineKeyboardMarkup(keyboard)

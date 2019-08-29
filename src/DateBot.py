@@ -67,15 +67,9 @@ class DateBot:
             except:
                 chatId = update['callback_query']['message']['chat']['id']
 
-            bot.sendMessage(chatId, results[:4096], parse_mode='Markdown')
+            bot.sendMessage(chatId, results[:4095], parse_mode='Markdown')
             time.sleep(5)
-            bot.sendMessage(chatId, results[4096:8000], parse_mode='Markdown')
-
-
-
-
-
-
+            bot.sendMessage(chatId, results[4096:8192], parse_mode='Markdown')
 
 
     def selectTerm(self, bot, update):
@@ -87,6 +81,9 @@ class DateBot:
             [
                 telegram.InlineKeyboardButton('Aulas e Férias/Feriados', callback_data = 'date-aulas'),
                 telegram.InlineKeyboardButton('ACCs', callback_data = 'date-acc')
+            ],
+            [
+                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
             
