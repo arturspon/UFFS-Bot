@@ -3,10 +3,19 @@ import telegram
 class Utils:
 
     @staticmethod
+    def getChatId(bot, update):
+        chatId = None
+        try:
+            chatId = update.message.chat_id
+        except:
+            chatId = update['callback_query']['message']['chat']['id']
+        return chatId
+
+    @staticmethod
     def showStartMenu(bot, update):
         bot.send_message(
-            chat_id = update.message.chat_id,
-            text = '*Olá!\nSelecione uma opção para continuar...*',
+            chat_id = Utils.getChatId(bot, update),
+            text = '*\nSelecione uma opção para continuar...*',
             parse_mode = 'Markdown',
             reply_markup = Utils.getMainMenuMarkup()
         )

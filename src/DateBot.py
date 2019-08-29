@@ -1,6 +1,7 @@
 import telegram
 from tika import parser
 import time
+from Utils import Utils
 
 class DateBot:
 
@@ -68,8 +69,9 @@ class DateBot:
                 chatId = update['callback_query']['message']['chat']['id']
 
             bot.sendMessage(chatId, results[:4095], parse_mode='Markdown')
-            time.sleep(5)
+            time.sleep(3)
             bot.sendMessage(chatId, results[4096:8192], parse_mode='Markdown')
+        Utils.showStartMenu(bot, update)
 
 
     def selectTerm(self, bot, update):

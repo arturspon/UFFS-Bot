@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime, date
+from Utils import Utils
 
 class EventsBot:
 
@@ -44,6 +45,11 @@ class EventsBot:
         message = self.getEvents()
 
         bot.send_message(
-                chat_id = chatId,
-                text = message
-            )
+            chat_id = chatId,
+            text = message
+        )
+
+        try:
+            Utils.showStartMenu(bot, update)
+        except Exception as e:
+            print(e)
