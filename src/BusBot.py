@@ -101,8 +101,12 @@ class BusBot:
     def selectStartPoint(self, bot, update, city):
         keyboard = [
             [
-                telegram.InlineKeyboardButton('Terminal', callback_data = 'startPointBus-terminal-' + city),
-                telegram.InlineKeyboardButton('UFFS', callback_data = 'startPointBus-uffs-' + city)
+                telegram.InlineKeyboardButton('Terminal', callback_data = 'startPointBus-terminal-' + city + '-week'),
+                telegram.InlineKeyboardButton('Terminal (Sábado)', callback_data = 'startPointBus-terminal-' + city + '-sat'),
+            ],
+            [
+                telegram.InlineKeyboardButton('UFFS', callback_data = 'startPointBus-uffs-' + city + '-week'),
+                telegram.InlineKeyboardButton('UFFS (Sábado)', callback_data = 'startPointBus-uffs-' + city + '-sat'),
             ],
             [
                 telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
@@ -118,14 +122,16 @@ class BusBot:
             reply_markup = replyMarkup
         )
 
-    def showSchedule(self, bot, update, startPointAndCity):
-        startPointAndCity = startPointAndCity.split('-')
-        startPoint = startPointAndCity[0]
-        city = startPointAndCity[1]
-        if city in self.schedules:
+    def showSchedule(self, bot, update, startPointAndCityAndPeriod):
+        startPointAndCityAndPeriod = startPointAndCityAndPeriod.split('-')
+        startPoint = startPointAndCityAndPeriod[0]
+        city = startPointAndCityAndPeriod[1]
+        period = startPointAndCityAndPeriod[2]
+
+        if city in self.schedules and self.schedules[city][period][startPoint]:
             bot.send_message(
                 chat_id = update.callback_query.message.chat.id,
-                text = self.formatSchedule(self.schedules[city]['week'][startPoint], startPoint, city),
+                text = self.formatSchedule(self.schedules[city][period][startPoint], startPoint, city, period),
                 parse_mode = 'Markdown'
             )
         else:
@@ -135,8 +141,12 @@ class BusBot:
                 parse_mode = 'Markdown'
             )
 
-    def formatSchedule(self, scheduleList, startPoint, city):
-        formattedText = '*Horários de saída dos ônibus do(a) ' + startPoint.upper() + ' em ' + self.citiesFullName[city] + ':*\n'
+    def formatSchedule(self, scheduleList, startPoint, city, period):
+        if period == 'sat':
+            formattedText = '*Horários de saída dos ônibus do(a) ' + startPoint.upper() + ' em ' + self.citiesFullName[city] + ' no sábado:*\n'
+        else:
+            formattedText = '*Horários de saída dos ônibus do(a) ' + startPoint.upper() + ' em ' + self.citiesFullName[city] + ':*\n'
+
         for schedule in scheduleList:
             formattedText += schedule + ', '         
         return formattedText[:-2] + '.\n'
