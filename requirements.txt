@@ -3,3 +3,5 @@ requests==2.20.0
 requests-unixsocket==0.1.5
 python-telegram-bot==11.1.0
 python-dotenv==0.10.3
+tika==1.19
+schedule==0.6.0

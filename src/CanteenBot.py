@@ -16,8 +16,8 @@ class CanteenBot:
         bot.editMessageText(
             message_id = update.callback_query.message.message_id,
             chat_id = update.callback_query.message.chat.id,
-            text = 'Selecione o campus:',
-            parse_mode = 'HTML',
+            text = '*Selecione o campus:*',
+            parse_mode = 'Markdown',
             reply_markup = replyMarkup
         )
 
