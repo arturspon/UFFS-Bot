@@ -152,7 +152,6 @@ class RuBot:
                 chat_id=chat_id,
                 text='Cardápio automático ativado'
             )
-
         except Exception as e:
             print("subToPeriodicMenu: "+str(e)+"\n")
 
@@ -232,6 +231,9 @@ class RuBot:
             ],
             [
                 telegram.InlineKeyboardButton('Desativar cardapio automático', callback_data = 'unsub')
+            ],
+            [
+                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
 
