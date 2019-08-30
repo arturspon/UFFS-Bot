@@ -18,7 +18,6 @@ class DateBot:
             return False
 
     def getImportantDates(self, raw, term):
-
         if(term == "matriculas" and 'atrícula' in raw):
             return True
         elif(term == "ccr" and 'CCR' in raw):
@@ -53,26 +52,13 @@ class DateBot:
 
         separator = '\n'
         results = separator.join(results)
-        if(len(results) < 4096):
-            chatId = None
-            try:
-                chatId = update.message.chat_id
-            except:
-                chatId = update['callback_query']['message']['chat']['id']
 
-            bot.sendMessage(chatId, results, parse_mode='Markdown')
-        else:
-            chatId = None
-            try:
-                chatId = update.message.chat_id
-            except:
-                chatId = update['callback_query']['message']['chat']['id']
-
-            bot.sendMessage(chatId, results[:4095], parse_mode='Markdown')
-            time.sleep(3)
-            bot.sendMessage(chatId, results[4096:8192], parse_mode='Markdown')
+        maxCharactersPerTelegramMsg = 4095
+        results = [results[i:i+maxCharactersPerTelegramMsg] for i in range(0, len(results), maxCharactersPerTelegramMsg)]
+        for partOfMsg in results:
+            bot.sendMessage(Utils.getChatId(bot, update), partOfMsg, parse_mode='Markdown')
+            time.sleep(2)
         Utils.showStartMenu(bot, update)
-
 
     def selectTerm(self, bot, update):
         keyboard = [
