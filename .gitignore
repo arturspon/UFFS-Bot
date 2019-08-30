@@ -1,3 +1,7 @@
+# Files downloaded by the bot
+calendario-academico.pdf
+users.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
