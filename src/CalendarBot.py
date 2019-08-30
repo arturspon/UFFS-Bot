@@ -1,18 +1,15 @@
 import requests
 from bs4 import BeautifulSoup
 import telegram
+from Utils import Utils
 
 class CalendarBot:
     urlAcademicCalendar = 'https://www.uffs.edu.br/institucional/pro-reitorias/graduacao/calendario-academico'
     isCalendarInCache = False
 
     def getCalendar(self, bot, update):
-        chatId = None
-        try:
-            chatId = update.message.chat_id
-        except:
-            chatId = update['callback_query']['message']['chat']['id']
-
+        chatId = Utils.getChatId(bot, update)
+        
         bot.sendMessage(
             chatId,
             '*Só um segundo...*',

@@ -1,4 +1,5 @@
 import telegram
+from Utils import Utils
 
 class CanteenBot:
 
@@ -21,13 +22,6 @@ class CanteenBot:
             reply_markup = replyMarkup
         )
 
-    def showCardapio(self, bot, update):
-        chatId = None
-        try:
-            chatId = update.message.chat_id
-        except:
-            chatId = update['callback_query']['message']['chat']['id']
-        
+    def showCardapio(self, bot, update):        
         imgToSend = 'https://i.imgur.com/ec3Rvub.png'
-
-        bot.send_photo(chat_id=chatId, photo=imgToSend)
+        bot.send_photo(chat_id = Utils.getChatId(bot, update), photo = imgToSend)

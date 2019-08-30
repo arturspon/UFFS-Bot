@@ -35,21 +35,10 @@ class EventsBot:
         eventList.sort(key=lambda x: x[3])
         return self.formatList(eventList)
 
-    def showEvents(self, bot, update):
-        chatId = None
-        try:
-            chatId = update.message.chat_id
-        except:
-            chatId = update['callback_query']['message']['chat']['id']
-        
+    def showEvents(self, bot, update):        
         message = self.getEvents()
-
         bot.send_message(
-            chat_id = chatId,
+            chat_id = Utils.getChatId(bot, update),
             text = message
         )
-
-        try:
-            Utils.showStartMenu(bot, update)
-        except Exception as e:
-            print(e)
+        Utils.showStartMenu(bot, update)
