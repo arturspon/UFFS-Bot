@@ -2,6 +2,7 @@ import telegram
 from tika import parser
 import time
 from Utils import Utils
+import re
 
 class DateBot:
 
@@ -37,7 +38,7 @@ class DateBot:
 
         results = []
         for i in rawList:
-            if(i == '2020'):     #encontrar alguma forma de pegar apenas o ano em andamento dinamicamente
+            if(re.search('^[0-9]{4}$', i)):
                 break
 
             if(term != "todas"):
