@@ -2,7 +2,7 @@ import os
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
 from Utils import Utils
-import RuBot, BusBot, CalendarBot, CanteenBot, EventsBot, DateBot
+import RuBot, BusBot, CalendarBot, CanteenBot, EventsBot, DateBot, DatabaseConnection
 from conf.settings import telegramToken
 import threading
 
@@ -12,6 +12,7 @@ busBot = BusBot.BusBot()
 calendarBot = CalendarBot.CalendarBot()
 eventsBot = EventsBot.EventsBot()
 dateBot = DateBot.DateBot()
+databaseConnection = DatabaseConnection.DatabaseConnection()
 
 def callHandler(bot, update):
     if update.callback_query.data == 'menu-ru':
@@ -70,7 +71,8 @@ def downloadNeededFiles():
 
 def main():
     downloadNeededFiles()
-    
+    databaseConnection.createTables()
+
     bot =  telegram.Bot(telegramToken)
     updater = Updater(bot=bot)
     dp = updater.dispatcher

@@ -43,6 +43,10 @@ class RuBot:
 
         img = requests.post('https://hcti.io/v1/image', data = {'HTML': html}, auth=(htciId, htciKey))
         imgUrl = img.text.split('"')[3]
+
+        query = "INSERT INTO images (weekNumber, imgUrl, imgHtml, campus) VALUES ("+str(date.today().isocalendar()[1])+", '"+imgUrl+"', '"+html+"', '"+campus+"');"
+        self.databaseConnection.executeQuery(query)
+
         self.menuCache[str(date.today().isocalendar()[1]) + campus] = imgUrl
 
         return imgUrl
@@ -106,6 +110,9 @@ class RuBot:
             chatId = update.message.chat_id
         except:
             chatId = update['callback_query']['message']['chat']['id']
+
+        query = 'SELECT imgUrl, imgHtml FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
+        image = self.databaseConnection.fetchAll(query)
 
         if str(date.today().isocalendar()[1]) + campus in self.menuCache:
             imgToSend = self.menuCache[str(date.today().isocalendar()[1]) + campus]
@@ -232,12 +239,6 @@ class RuBot:
 
     def sendMenuPeriodically(self, bot):
         try:
-            # Cria tabela para armazenar os chat_id dos usuarios possibilitando o envio de mensagens sem o chamado de comandos
-            # campus armazena o campus do qual o usuario deseja saber o cardapio
-            # Period armazena se ira receber o cardapio semanalmente ou diariamente ou não receber
-            query = "CREATE TABLE IF NOT EXISTS users (chat_id INTEGER PRIMARY KEY, campus TEXT, period TEXT);"
-            self.databaseConnection.executeQuery(query)
-
             #Todo dias as 10:00 manda o cardaio para os cadastrados
             schedule.every().monday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().tuesday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
