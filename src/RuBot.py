@@ -7,10 +7,11 @@ import re
 import telegram
 from conf.settings import htciId, htciKey
 import schedule
-import sqlite3
+import DatabaseConnection
 from Utils import Utils
 
 class RuBot:
+    databaseConnection = DatabaseConnection.DatabaseConnection()
     menuCache = {}
     menuCacheHTML = {}
     dailyMenus = {}
@@ -117,11 +118,8 @@ class RuBot:
 
     def isInDataBase(self, chat_id):
         try:
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-            cursor.execute('SELECT chat_id FROM users WHERE chat_id = '+str(chat_id)+';')
-            users = cursor.fetchall()
-            conn.close()
+            query = 'SELECT chat_id FROM users WHERE chat_id = '+str(chat_id)+';'
+            users = self.databaseConnection.fetchAll(query)
             if len(users):
                 return True
             else:
@@ -143,11 +141,7 @@ class RuBot:
             else:
                 query = "INSERT INTO users VALUES ("+str(chat_id)+", '"+campus+"', '"+period+"');"
 
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-            cursor.execute(query)
-            conn.commit()
-            conn.close()
+            self.databaseConnection.executeQuery(query)
 
             bot.send_message(
                 chat_id=chat_id,
@@ -164,11 +158,7 @@ class RuBot:
             except:
                 chat_id = update['callback_query']['message']['chat']['id']
             query = "UPDATE users SET period = 'none' WHERE chat_id = "+str(chat_id)+';'
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-            cursor.execute(query)
-            conn.commit()
-            conn.close()
+            self.databaseConnection.executeQuery(query)
 
             bot.send_message(
                 chat_id=chat_id,
@@ -181,12 +171,7 @@ class RuBot:
     def sendMenuToSubs(self, bot, period):
         try:
             query = "SELECT * FROM users WHERE period = '"+period+"';"
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-            cursor.execute(query)
-            users = cursor.fetchall()
-            conn.commit()
-            conn.close()
+            users = self.databaseConnection.fetchAll(query)
             for user in users:
                 chat_id = user[0]
                 campus = user[1]
@@ -203,11 +188,7 @@ class RuBot:
                         )
                 except:
                     query = 'DELETE * FROM users WHERE chat_id = '+chat_id+';'
-                    conn = sqlite3.connect('users.db')
-                    cursor = conn.cursor()
-                    cursor.execute(query)
-                    conn.commit()
-                    conn.close()
+                    self.databaseConnection.executeQuery(query)
 
         except Exception as e:
             print("sendMenuToSubs: "+str(e)+"\n")
@@ -251,14 +232,11 @@ class RuBot:
 
     def sendMenuPeriodically(self, bot):
         try:
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-                # Cria tabela para armazenar os chat_id dos usuarios possibilitando o envio de mensagens sem o chamado de comandos
-                # campus armazena o campus do qual o usuario deseja saber o cardapio
-                # Period armazena se ira receber o cardapio semanalmente ou diariamente ou não receber
-            cursor.execute("CREATE TABLE IF NOT EXISTS users (chat_id INTEGER PRIMARY KEY, campus TEXT, period TEXT);")
-            conn.commit()
-            conn.close()
+            # Cria tabela para armazenar os chat_id dos usuarios possibilitando o envio de mensagens sem o chamado de comandos
+            # campus armazena o campus do qual o usuario deseja saber o cardapio
+            # Period armazena se ira receber o cardapio semanalmente ou diariamente ou não receber
+            query = "CREATE TABLE IF NOT EXISTS users (chat_id INTEGER PRIMARY KEY, campus TEXT, period TEXT);"
+            self.databaseConnection.executeQuery(query)
 
             #Todo dias as 10:00 manda o cardaio para os cadastrados
             schedule.every().monday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
@@ -267,7 +245,7 @@ class RuBot:
             schedule.every().thursday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().friday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             #Toda segunda as 9:00 manda o cardapio para os cadastrados
-            schedule.every().sunday.at('10:00').do(self.sendMenuToSubs, bot, "weekly")
+            schedule.every().friday.at('10:00').do(self.sendMenuToSubs, bot, "weekly")
 
             while True:
                 schedule.run_pending()
