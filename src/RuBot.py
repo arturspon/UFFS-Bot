@@ -168,9 +168,11 @@ class RuBot:
                 campus = user[1]
                 try: #Tenta enviar mensagem para o chat_id cadastrado
                     if period == 'weekly':
+                        query = 'SELECT imgUrl FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
+                        image = self.databaseConnection.fetchAll(query)
                         bot.send_photo(
                             chat_id=chat_id,
-                            photo=self.getMenu(campus)
+                            photo=image[0][0]
                         )
                     elif period == 'daily':
                         bot.send_message(
@@ -223,16 +225,29 @@ class RuBot:
             reply_markup = replyMarkup
         )
 
+    def getImages(self):
+        listOfCampus = ['chapeco', 'cerro-largo', 'erechim', 'laranjeiras-do-sul', 'realeza']
+
+        for i in range(len(listOfCampus)):
+            query = 'SELECT * FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+listOfCampus[i]+'";'
+            image = self.databaseConnection.fetchAll(query)
+            if len(image) == 0:
+                self.getMenu(listOfCampus[i])
+
     def sendMenuPeriodically(self, bot):
         try:
+            # Download do cardápio toda segundas às 09h caso já não tenha sido baixado
+            schedule.every().monday.at('09:00').do(self.getImages)
+
             #Todo dias as 10:00 manda o cardaio para os cadastrados
             schedule.every().monday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().tuesday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().wednesday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().thursday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().friday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
-            #Toda segunda as 9:00 manda o cardapio para os cadastrados
-            schedule.every().friday.at('10:00').do(self.sendMenuToSubs, bot, "weekly")
+
+            #Toda segunda as 10:00 manda o cardapio para os cadastrados
+            schedule.every().monday.at('10:00').do(self.sendMenuToSubs, bot, "weekly")
 
             while True:
                 schedule.run_pending()
