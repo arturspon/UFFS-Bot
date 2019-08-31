@@ -12,8 +12,6 @@ from Utils import Utils
 
 class RuBot:
     databaseConnection = DatabaseConnection.DatabaseConnection()
-    menuCache = {}
-    menuCacheHTML = {}
     dailyMenus = {}
 
     def findWeek(self, soup):
@@ -36,18 +34,14 @@ class RuBot:
         weekNumberCalendar = date(int(firstWeek[2]), int(firstWeek[1]), int(firstWeek[0])).isocalendar()[1]
         if(weekNumberToday == weekNumberCalendar):
             html = str(week[0]) + str(table[0])
-            self.menuCacheHTML[str(date.today().isocalendar()[1]) + campus] = html
         else:
             html = str(week[1]) + str(table[1])
-            self.menuCacheHTML[str(date.today().isocalendar()[1]) + campus] = html
 
         img = requests.post('https://hcti.io/v1/image', data = {'HTML': html}, auth=(htciId, htciKey))
         imgUrl = img.text.split('"')[3]
 
         query = "INSERT INTO images (weekNumber, imgUrl, imgHtml, campus) VALUES ("+str(date.today().isocalendar()[1])+", '"+imgUrl+"', '"+html+"', '"+campus+"');"
         self.databaseConnection.executeQuery(query)
-
-        self.menuCache[str(date.today().isocalendar()[1]) + campus] = imgUrl
 
         return imgUrl
 
@@ -111,11 +105,11 @@ class RuBot:
         except:
             chatId = update['callback_query']['message']['chat']['id']
 
-        query = 'SELECT imgUrl, imgHtml FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
+        query = 'SELECT imgUrl FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
         image = self.databaseConnection.fetchAll(query)
 
-        if str(date.today().isocalendar()[1]) + campus in self.menuCache:
-            imgToSend = self.menuCache[str(date.today().isocalendar()[1]) + campus]
+        if len(image):
+            imgToSend = image[0][0]
         else:
             bot.sendMessage(chatId, 'Aguarde enquanto baixamos o cardápio...')
             imgToSend = self.getMenu(campus)
@@ -204,7 +198,9 @@ class RuBot:
         try:
             today = str(date.today().isocalendar()[1]) + campus + str(date.today().weekday())
             if today not in self.dailyMenus:
-                soup = BeautifulSoup(self.menuCacheHTML[str(date.today().isocalendar()[1]) + campus], 'html.parser')
+                query = 'SELECT imgHtml FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
+                image = self.databaseConnection.fetchAll(query)
+                soup = BeautifulSoup(image[0][0], 'html.parser')
                 column = ''
                 for row in soup.findAll('table')[0].tbody.findAll('tr'):
                     column = column + '\n' + row.findAll('td')[date.today().weekday()].p.text
