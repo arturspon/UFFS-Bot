@@ -7,12 +7,11 @@ import re
 import telegram
 from conf.settings import htciId, htciKey
 import schedule
-import sqlite3
+import DatabaseConnection
 from Utils import Utils
 
 class RuBot:
-    menuCache = {}
-    menuCacheHTML = {}
+    databaseConnection = DatabaseConnection.DatabaseConnection()
     dailyMenus = {}
 
     def findWeek(self, soup):
@@ -35,14 +34,14 @@ class RuBot:
         weekNumberCalendar = date(int(firstWeek[2]), int(firstWeek[1]), int(firstWeek[0])).isocalendar()[1]
         if(weekNumberToday == weekNumberCalendar):
             html = str(week[0]) + str(table[0])
-            self.menuCacheHTML[str(date.today().isocalendar()[1]) + campus] = html
         else:
             html = str(week[1]) + str(table[1])
-            self.menuCacheHTML[str(date.today().isocalendar()[1]) + campus] = html
 
         img = requests.post('https://hcti.io/v1/image', data = {'HTML': html}, auth=(htciId, htciKey))
         imgUrl = img.text.split('"')[3]
-        self.menuCache[str(date.today().isocalendar()[1]) + campus] = imgUrl
+
+        query = "INSERT INTO images (weekNumber, imgUrl, imgHtml, campus) VALUES ("+str(date.today().isocalendar()[1])+", '"+imgUrl+"', '"+html+"', '"+campus+"');"
+        self.databaseConnection.executeQuery(query)
 
         return imgUrl
 
@@ -100,14 +99,13 @@ class RuBot:
             print("isInDataBase: "+str(e)+"\n")
 
     def showCardapio(self, bot, update, campus):
-        chatId = None
-        try:
-            chatId = update.message.chat_id
-        except:
-            chatId = update['callback_query']['message']['chat']['id']
+        chatId = Utils.getChatId(bot, update)
 
-        if str(date.today().isocalendar()[1]) + campus in self.menuCache:
-            imgToSend = self.menuCache[str(date.today().isocalendar()[1]) + campus]
+        query = 'SELECT imgUrl FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
+        image = self.databaseConnection.fetchAll(query)
+
+        if len(image):
+            imgToSend = image[0][0]
         else:
             bot.sendMessage(chatId, 'Aguarde enquanto baixamos o cardápio...')
             imgToSend = self.getMenu(campus)
@@ -117,11 +115,8 @@ class RuBot:
 
     def isInDataBase(self, chat_id):
         try:
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-            cursor.execute('SELECT chat_id FROM users WHERE chat_id = '+str(chat_id)+';')
-            users = cursor.fetchall()
-            conn.close()
+            query = 'SELECT chat_id FROM users WHERE chat_id = '+str(chat_id)+';'
+            users = self.databaseConnection.fetchAll(query)
             if len(users):
                 return True
             else:
@@ -134,20 +129,13 @@ class RuBot:
             callback_data=callback_data.split('/')
             period = callback_data[1]
             campus = callback_data[2]
-            try:
-                chat_id = update.message.chat_id
-            except:
-                chat_id = update['callback_query']['message']['chat']['id']
+            chat_id = Utils.getChatId(bot, update)
             if self.isInDataBase(chat_id):
                 query = "UPDATE users SET campus = '"+campus+"', period = '"+period+"' WHERE chat_id = "+str(chat_id)+';'
             else:
                 query = "INSERT INTO users VALUES ("+str(chat_id)+", '"+campus+"', '"+period+"');"
 
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-            cursor.execute(query)
-            conn.commit()
-            conn.close()
+            self.databaseConnection.executeQuery(query)
 
             bot.send_message(
                 chat_id=chat_id,
@@ -159,16 +147,9 @@ class RuBot:
 
     def unsubToPeriodicMenu(self, bot, update):
         try:
-            try:
-                chat_id = update.message.chat_id
-            except:
-                chat_id = update['callback_query']['message']['chat']['id']
+            chat_id = Utils.getChatId(bot, update)
             query = "UPDATE users SET period = 'none' WHERE chat_id = "+str(chat_id)+';'
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-            cursor.execute(query)
-            conn.commit()
-            conn.close()
+            self.databaseConnection.executeQuery(query)
 
             bot.send_message(
                 chat_id=chat_id,
@@ -181,20 +162,17 @@ class RuBot:
     def sendMenuToSubs(self, bot, period):
         try:
             query = "SELECT * FROM users WHERE period = '"+period+"';"
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-            cursor.execute(query)
-            users = cursor.fetchall()
-            conn.commit()
-            conn.close()
+            users = self.databaseConnection.fetchAll(query)
             for user in users:
                 chat_id = user[0]
                 campus = user[1]
                 try: #Tenta enviar mensagem para o chat_id cadastrado
                     if period == 'weekly':
+                        query = 'SELECT imgUrl FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
+                        image = self.databaseConnection.fetchAll(query)
                         bot.send_photo(
                             chat_id=chat_id,
-                            photo=self.getMenu(campus)
+                            photo=image[0][0]
                         )
                     elif period == 'daily':
                         bot.send_message(
@@ -203,11 +181,7 @@ class RuBot:
                         )
                 except:
                     query = 'DELETE * FROM users WHERE chat_id = '+chat_id+';'
-                    conn = sqlite3.connect('users.db')
-                    cursor = conn.cursor()
-                    cursor.execute(query)
-                    conn.commit()
-                    conn.close()
+                    self.databaseConnection.executeQuery(query)
 
         except Exception as e:
             print("sendMenuToSubs: "+str(e)+"\n")
@@ -216,7 +190,9 @@ class RuBot:
         try:
             today = str(date.today().isocalendar()[1]) + campus + str(date.today().weekday())
             if today not in self.dailyMenus:
-                soup = BeautifulSoup(self.menuCacheHTML[str(date.today().isocalendar()[1]) + campus], 'html.parser')
+                query = 'SELECT imgHtml FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
+                image = self.databaseConnection.fetchAll(query)
+                soup = BeautifulSoup(image[0][0], 'html.parser')
                 column = ''
                 for row in soup.findAll('table')[0].tbody.findAll('tr'):
                     column = column + '\n' + row.findAll('td')[date.today().weekday()].p.text
@@ -249,16 +225,19 @@ class RuBot:
             reply_markup = replyMarkup
         )
 
+    def getImages(self):
+        listOfCampus = ['chapeco', 'cerro-largo', 'erechim', 'laranjeiras-do-sul', 'realeza']
+
+        for i in range(len(listOfCampus)):
+            query = 'SELECT * FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+listOfCampus[i]+'";'
+            image = self.databaseConnection.fetchAll(query)
+            if len(image) == 0:
+                self.getMenu(listOfCampus[i])
+
     def sendMenuPeriodically(self, bot):
         try:
-            conn = sqlite3.connect('users.db')
-            cursor = conn.cursor()
-                # Cria tabela para armazenar os chat_id dos usuarios possibilitando o envio de mensagens sem o chamado de comandos
-                # campus armazena o campus do qual o usuario deseja saber o cardapio
-                # Period armazena se ira receber o cardapio semanalmente ou diariamente ou não receber
-            cursor.execute("CREATE TABLE IF NOT EXISTS users (chat_id INTEGER PRIMARY KEY, campus TEXT, period TEXT);")
-            conn.commit()
-            conn.close()
+            # Download do cardápio toda segundas às 09h caso já não tenha sido baixado
+            schedule.every().monday.at('09:00').do(self.getImages)
 
             #Todo dias as 10:00 manda o cardaio para os cadastrados
             schedule.every().monday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
@@ -266,8 +245,9 @@ class RuBot:
             schedule.every().wednesday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().thursday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().friday.at('10:00').do(self.sendMenuToSubs, bot, "daily")
-            #Toda segunda as 9:00 manda o cardapio para os cadastrados
-            schedule.every().sunday.at('10:00').do(self.sendMenuToSubs, bot, "weekly")
+
+            #Toda segunda as 10:00 manda o cardapio para os cadastrados
+            schedule.every().monday.at('10:00').do(self.sendMenuToSubs, bot, "weekly")
 
             while True:
                 schedule.run_pending()
