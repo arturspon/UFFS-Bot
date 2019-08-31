@@ -99,11 +99,7 @@ class RuBot:
             print("isInDataBase: "+str(e)+"\n")
 
     def showCardapio(self, bot, update, campus):
-        chatId = None
-        try:
-            chatId = update.message.chat_id
-        except:
-            chatId = update['callback_query']['message']['chat']['id']
+        chatId = Utils.getChatId(bot, update)
 
         query = 'SELECT imgUrl FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
         image = self.databaseConnection.fetchAll(query)
@@ -133,10 +129,7 @@ class RuBot:
             callback_data=callback_data.split('/')
             period = callback_data[1]
             campus = callback_data[2]
-            try:
-                chat_id = update.message.chat_id
-            except:
-                chat_id = update['callback_query']['message']['chat']['id']
+            chat_id = Utils.getChatId(bot, update)
             if self.isInDataBase(chat_id):
                 query = "UPDATE users SET campus = '"+campus+"', period = '"+period+"' WHERE chat_id = "+str(chat_id)+';'
             else:
@@ -154,10 +147,7 @@ class RuBot:
 
     def unsubToPeriodicMenu(self, bot, update):
         try:
-            try:
-                chat_id = update.message.chat_id
-            except:
-                chat_id = update['callback_query']['message']['chat']['id']
+            chat_id = Utils.getChatId(bot, update)
             query = "UPDATE users SET period = 'none' WHERE chat_id = "+str(chat_id)+';'
             self.databaseConnection.executeQuery(query)
 
