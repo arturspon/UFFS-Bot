@@ -42,6 +42,7 @@ class RuBot:
 
         query = "INSERT INTO images (weekNumber, imgUrl, imgHtml, campus) VALUES ("+str(date.today().isocalendar()[1])+", '"+imgUrl+"', '"+html+"', '"+campus+"');"
         self.databaseConnection.executeQuery(query)
+        print('Inserido nova imagem ao banco\nweekNumber: ', str(date.today().isocalendar()[1]), '\tCampus: ', campus)
 
         return imgUrl
 
@@ -112,6 +113,7 @@ class RuBot:
 
         if imgToSend:
             bot.send_photo(chat_id=chatId, photo=imgToSend)
+            print('Enviado cardápio para ' + Utils.getUsername(bot, update))
 
     def isInDataBase(self, chat_id):
         try:
@@ -130,10 +132,11 @@ class RuBot:
             period = callback_data[1]
             campus = callback_data[2]
             chat_id = Utils.getChatId(bot, update)
+            username = Utils.getUsername(bot, update)
             if self.isInDataBase(chat_id):
-                query = "UPDATE users SET campus = '"+campus+"', period = '"+period+"' WHERE chat_id = "+str(chat_id)+';'
+                query = "UPDATE users SET campus = '"+campus+"', period = '"+period+"', username = '"+username+"' WHERE chat_id = "+str(chat_id)+';'
             else:
-                query = "INSERT INTO users VALUES ("+str(chat_id)+", '"+campus+"', '"+period+"');"
+                query = "INSERT INTO users VALUES ("+str(chat_id)+", '"+username+"', '"+campus+"', '"+period+"');"
 
             self.databaseConnection.executeQuery(query)
 
@@ -141,6 +144,7 @@ class RuBot:
                 chat_id=chat_id,
                 text='Cardápio automático ativado'
             )
+            print('Usuário ', username, ' ativou o cardápio automático ', period, ' para o campus ', campus)
             Utils.showStartMenuInExistingMsg(bot, update)
         except Exception as e:
             print("subToPeriodicMenu: "+str(e)+"\n")
@@ -155,6 +159,7 @@ class RuBot:
                 chat_id=chat_id,
                 text='Cardápio automático desativado'
             )
+            print('Usuário ', Utils.getUsername(bot, update), ' desativou o cardápio automático')
 
         except Exception as e:
             print("unsubToPeriodicMenu: "+str(e)+"\n")
@@ -165,7 +170,8 @@ class RuBot:
             users = self.databaseConnection.fetchAll(query)
             for user in users:
                 chat_id = user[0]
-                campus = user[1]
+                username = user[1]
+                campus = user[2]
                 try: #Tenta enviar mensagem para o chat_id cadastrado
                     if period == 'weekly':
                         query = 'SELECT imgUrl FROM images WHERE weekNumber = '+str(date.today().isocalendar()[1])+' AND campus = "'+campus+'";'
@@ -179,9 +185,11 @@ class RuBot:
                             chat_id=chat_id,
                             text=self.getDailyMenu(campus)
                         )
-                except:
+                    print('Enviado ' + period + ' para ' + username)
+                except Exception as error:
                     query = 'DELETE * FROM users WHERE chat_id = '+chat_id+';'
                     self.databaseConnection.executeQuery(query)
+                    print('Erro em enviar o cardápio: ', error)
 
         except Exception as e:
             print("sendMenuToSubs: "+str(e)+"\n")
