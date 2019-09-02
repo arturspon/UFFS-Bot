@@ -1,4 +1,5 @@
 import telegram
+from datetime import datetime, date
 
 class Utils:
 
@@ -21,6 +22,10 @@ class Utils:
             username = update['callback_query']['message']['chat']['first_name'] + ' ' 
             if update['callback_query']['message']['chat']['last_name']: username+= update['callback_query']['message']['chat']['last_name']
         return username
+    
+    @staticmethod
+    def getWeekNumber():
+        return datetime.today().isocalendar()[1]
 
     @staticmethod
     def showStartMenu(bot, update):
