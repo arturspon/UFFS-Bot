@@ -144,9 +144,9 @@ class RuBot:
                 chat_id=chat_id,
                 text=message
             )
+            Utils.showStartMenuInExistingMsg(bot, update)
             print('Usuário', username, 'ativou o cardápio automático', period, 'para o campus', campus)
             self.showCardapio(bot, update, campus)
-            Utils.showStartMenuInExistingMsg(bot, update)
         except Exception as e:
             print("subToPeriodicMenu: "+str(e)+"\n")
 
@@ -160,6 +160,7 @@ class RuBot:
                 chat_id=chat_id,
                 text='Cardápio automático desativado'
             )
+            Utils.showStartMenuInExistingMsg(bot, update)
             print('Usuário', Utils.getUsername(bot, update), 'desativou o cardápio automático')
 
         except Exception as e:
@@ -209,10 +210,17 @@ class RuBot:
             print("getDailyMenu: "+str(e)+"\n")
 
     def selectPeriod(self, bot, update):
+        chat_id = update.callback_query.message.chat.id
+        dailyButton = 'Diário'
+        weeklyButton = 'Semanal'
+        if self.isInDataBase(chat_id, 'daily'):
+            dailyButton += ' ✔'
+        if self.isInDataBase(chat_id, 'weekly'):
+            weeklyButton += ' ✔'
         keyboard = [
             [
-                telegram.InlineKeyboardButton('Diário', callback_data = 'daily'),
-                telegram.InlineKeyboardButton('Semanal', callback_data = 'weekly')
+                telegram.InlineKeyboardButton(dailyButton, callback_data = 'daily'),
+                telegram.InlineKeyboardButton(weeklyButton, callback_data = 'weekly')
             ],
             [
                 telegram.InlineKeyboardButton('Desativar cardapio automático', callback_data = 'unsub')
@@ -226,7 +234,7 @@ class RuBot:
 
         bot.editMessageText(
             message_id = update.callback_query.message.message_id,
-            chat_id = update.callback_query.message.chat.id,
+            chat_id = chat_id,
             text = 'Selecione a periodicidade:',
             parse_mode = 'HTML',
             reply_markup = replyMarkup
