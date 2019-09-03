@@ -22,7 +22,7 @@ class DatabaseConnection:
         # Cria tabela para armazenar os chat_id dos usuarios possibilitando o envio de mensagens sem o chamado de comandos
         # campus armazena o campus do qual o usuario deseja saber o cardapio
         # Period armazena se ira receber o cardapio semanalmente ou diariamente ou não receber
-        query = "CREATE TABLE IF NOT EXISTS users (chat_id INTEGER PRIMARY KEY, username TEXT, campus TEXT, period TEXT);"
+        query = "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, chat_id INTEGER, username TEXT, campus TEXT, period TEXT);"
         self.executeQuery(query)
         # Cria tabela para armazenar os links das imagens usados para exibir o cardápio
         # weekNumber armazena o dia da semana da url criada
