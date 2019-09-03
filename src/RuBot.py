@@ -139,11 +139,15 @@ class RuBot:
 
             self.databaseConnection.executeQuery(query)
 
+            message = 'Cardápio ' + Utils.getPeriodFormated(period) + ' ativado para ' + Utils.getCampusFormated(campus) + '\nCardápio desta semana:'
+            print(Utils.getCampusFormated(campus))
+            print(Utils.getPeriodFormated(period))
             bot.send_message(
                 chat_id=chat_id,
-                text='Cardápio automático ativado'
+                text=message
             )
             print('Usuário', username, 'ativou o cardápio automático', period, 'para o campus', campus)
+            self.showCardapio(bot, update, campus)
             Utils.showStartMenuInExistingMsg(bot, update)
         except Exception as e:
             print("subToPeriodicMenu: "+str(e)+"\n")
