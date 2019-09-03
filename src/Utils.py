@@ -28,6 +28,25 @@ class Utils:
         return datetime.today().isocalendar()[1]
 
     @staticmethod
+    def getPeriodFormated(period):
+        if(period == 'daily'):
+            return 'Diário'
+        return 'Semanal'
+
+    @staticmethod
+    def getCampusFormated(campus):
+        if(campus == 'chapeco'):
+            return 'Chapecó'
+        if(campus == 'cerro-largo'):
+            return 'Cerro Largo'
+        if(campus == 'erechim'):
+            return 'Erechim'
+        if(campus == 'laranjeiras-do-sul'):
+            return 'Laranjeiras do Sul'
+        if(campus == 'realeza'):
+            return 'Realeza'
+
+    @staticmethod
     def showStartMenu(bot, update):
         bot.send_message(
             chat_id = Utils.getChatId(bot, update),

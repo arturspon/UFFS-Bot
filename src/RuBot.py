@@ -96,7 +96,7 @@ class RuBot:
                 reply_markup = replyMarkup
             )
         except Exception as e:
-            print("isInDataBase: "+str(e)+"\n")
+            print("selectCampusAuto: "+str(e)+"\n")
 
     def showCardapio(self, bot, update, campus):
         chatId = Utils.getChatId(bot, update)
@@ -114,9 +114,9 @@ class RuBot:
             bot.send_photo(chat_id=chatId, photo=imgToSend)
             print('Enviado cardápio para', Utils.getUsername(bot, update))
 
-    def isInDataBase(self, chat_id):
+    def isInDataBase(self, chat_id, period):
         try:
-            query = "SELECT chat_id FROM users WHERE chat_id = '{}';".format(str(chat_id))
+            query = "SELECT chat_id FROM users WHERE chat_id = '{}' AND period = '{}';".format(str(chat_id), period)
             users = self.databaseConnection.fetchAll(query)
             if len(users):
                 return True
@@ -132,32 +132,35 @@ class RuBot:
             campus = callback_data[2]
             chat_id = Utils.getChatId(bot, update)
             username = Utils.getUsername(bot, update)
-            if self.isInDataBase(chat_id):
+            if self.isInDataBase(chat_id, period):
                 query = "UPDATE users SET campus = '{}', period = '{}', username = '{}' WHERE chat_id = '{}';".format(campus, period, username, chat_id)
             else:
-                query = "INSERT INTO users VALUES ('{}', '{}', '{}', '{}');".format(str(chat_id), username, campus, period)
+                query = "INSERT INTO users (chat_id, username, campus, period) VALUES ('{}', '{}', '{}', '{}');".format(str(chat_id), username, campus, period)
 
             self.databaseConnection.executeQuery(query)
 
+            message = 'Cardápio ' + Utils.getPeriodFormated(period) + ' ativado para ' + Utils.getCampusFormated(campus) + '\nCardápio desta semana:'
             bot.send_message(
                 chat_id=chat_id,
-                text='Cardápio automático ativado'
+                text=message
             )
-            print('Usuário', username, 'ativou o cardápio automático', period, 'para o campus', campus)
             Utils.showStartMenuInExistingMsg(bot, update)
+            print('Usuário', username, 'ativou o cardápio automático', period, 'para o campus', campus)
+            self.showCardapio(bot, update, campus)
         except Exception as e:
             print("subToPeriodicMenu: "+str(e)+"\n")
 
     def unsubToPeriodicMenu(self, bot, update):
         try:
             chat_id = Utils.getChatId(bot, update)
-            query = "UPDATE users SET period = 'none' WHERE chat_id = '{}';".format(str(chat_id))
+            query = "DELETE FROM users WHERE chat_id = '{}';".format(chat_id)
             self.databaseConnection.executeQuery(query)
 
             bot.send_message(
                 chat_id=chat_id,
                 text='Cardápio automático desativado'
             )
+            Utils.showStartMenuInExistingMsg(bot, update)
             print('Usuário', Utils.getUsername(bot, update), 'desativou o cardápio automático')
 
         except Exception as e:
@@ -165,7 +168,7 @@ class RuBot:
 
     def sendMenuToSubs(self, bot, period):
         try:
-            query = "SELECT * FROM users WHERE period = '{}';".format(period)
+            query = "SELECT chat_id, username, campus FROM users WHERE period = '{}';".format(period)
             users = self.databaseConnection.fetchAll(query)
             for user in users:
                 chat_id = user[0]
@@ -185,10 +188,8 @@ class RuBot:
                             text=self.getDailyMenu(campus)
                         )
                     print('Enviado', period, 'para', username)
-                except Exception as error:
-                    query = "DELETE FROM users WHERE chat_id = '{}';".format(chat_id)
-                    self.databaseConnection.executeQuery(query)
-                    print('Erro em enviar o cardápio: ', error)
+                except Exception as e:
+                    print("sendMenuToUser: "+str(e)+"\n")
 
         except Exception as e:
             print("sendMenuToSubs: "+str(e)+"\n")
@@ -209,10 +210,17 @@ class RuBot:
             print("getDailyMenu: "+str(e)+"\n")
 
     def selectPeriod(self, bot, update):
+        chat_id = update.callback_query.message.chat.id
+        dailyButton = 'Diário'
+        weeklyButton = 'Semanal'
+        if self.isInDataBase(chat_id, 'daily'):
+            dailyButton += ' ✔'
+        if self.isInDataBase(chat_id, 'weekly'):
+            weeklyButton += ' ✔'
         keyboard = [
             [
-                telegram.InlineKeyboardButton('Diário', callback_data = 'daily'),
-                telegram.InlineKeyboardButton('Semanal', callback_data = 'weekly')
+                telegram.InlineKeyboardButton(dailyButton, callback_data = 'daily'),
+                telegram.InlineKeyboardButton(weeklyButton, callback_data = 'weekly')
             ],
             [
                 telegram.InlineKeyboardButton('Desativar cardapio automático', callback_data = 'unsub')
@@ -226,7 +234,7 @@ class RuBot:
 
         bot.editMessageText(
             message_id = update.callback_query.message.message_id,
-            chat_id = update.callback_query.message.chat.id,
+            chat_id = chat_id,
             text = 'Selecione a periodicidade:',
             parse_mode = 'HTML',
             reply_markup = replyMarkup
