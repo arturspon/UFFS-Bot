@@ -7,12 +7,18 @@ import re
 class DateBot:
 
     def checkMonth(self, raw):
+        for char in "*\n":
+            raw = raw.replace(char, '')
+        
         if(raw == "JANEIRO" or raw == "FEVEREIRO" or raw == "MARÇO" or raw == "ABRIL" or raw == "MAIO" or raw == "JUNHO" or raw == "JULHO" or raw == "AGOSTO" or raw == "SETEMBRO" or raw == "OUTUBRO" or raw == "NOVEMBRO" or raw == "DEZEMBRO"):
             return True
         else:
             return False
 
     def checkGradu(self, raw):
+        for char in "*\n":
+            raw = raw.replace(char, '')
+
         if(raw == "Graduação" or raw == "Pós-Graduação"):
             return True
         else:
@@ -50,6 +56,29 @@ class DateBot:
                 else:
                     if(self.getImportantDates(i, term) == True):      #pega as informacoes que a principio são as mais relevantes
                         results.append(i)
+
+        count = 0
+
+        # ------- remove os meses sem informações
+        for i in results:                 
+            if(self.checkMonth(results[count]) == True):
+
+                if(self.checkGradu(results[count + 1]) == True):
+
+                    if(self.checkGradu(results[count + 2]) == True):
+
+                        if(self.checkMonth(results[count + 3]) == True):
+                            results.pop(count)
+                            results.pop(count)
+                            results.pop(count)
+                            count -=1
+
+                    elif(self.checkMonth(results[count + 2]) == True):
+                        results.pop(count)
+                        results.pop(count)
+                        count-=1
+                                    
+            count += 1
 
         separator = '\n'
         results = separator.join(results)

@@ -1,4 +1,5 @@
 import telegram
+from datetime import datetime, date
 
 class Utils:
 
@@ -10,6 +11,40 @@ class Utils:
         except:
             chatId = update['callback_query']['message']['chat']['id']
         return chatId
+
+    @staticmethod
+    def getUsername(bot, update):
+        username = None
+        try:
+            username = update.message.from_user.first_name + ' '
+            if update.message.from_user.last_name: username += update.message.from_user.last_name
+        except:
+            username = update['callback_query']['message']['chat']['first_name'] + ' ' 
+            if update['callback_query']['message']['chat']['last_name']: username+= update['callback_query']['message']['chat']['last_name']
+        return username
+    
+    @staticmethod
+    def getWeekNumber():
+        return datetime.today().isocalendar()[1]
+
+    @staticmethod
+    def getPeriodFormated(period):
+        if(period == 'daily'):
+            return 'Diário'
+        return 'Semanal'
+
+    @staticmethod
+    def getCampusFormated(campus):
+        if(campus == 'chapeco'):
+            return 'Chapecó'
+        if(campus == 'cerro-largo'):
+            return 'Cerro Largo'
+        if(campus == 'erechim'):
+            return 'Erechim'
+        if(campus == 'laranjeiras-do-sul'):
+            return 'Laranjeiras do Sul'
+        if(campus == 'realeza'):
+            return 'Realeza'
 
     @staticmethod
     def showStartMenu(bot, update):
