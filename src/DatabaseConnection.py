@@ -7,18 +7,23 @@ class DatabaseConnection:
             self.DATABASE_URL = databaseToken
             self.conn = psycopg2.connect(self.DATABASE_URL, sslmode='require')
             self.conn.autocommit = True
-            self.cursor = self.conn.cursor()
-        except:
-            print('Não foi possível conectar ao database')
+        except Exception as e:
+            print('Não foi possível conectar ao database: ', e)
 
     def fetchAll(self, query):
+        self.cursor = self.conn.cursor()
         self.cursor.execute(query)
-        return self.cursor.fetchall()
+        results = self.cursor.fetchall()
+        self.cursor.close()
+        return results
 
     def executeQuery(self, query):
+        self.cursor = self.conn.cursor()
         self.cursor.execute(query)
+        self.cursor.close()
 
     def createTables(self):
+        self.cursor = self.conn.cursor()
         # Cria tabela para armazenar os chat_id dos usuarios possibilitando o envio de mensagens sem o chamado de comandos
         # campus armazena o campus do qual o usuario deseja saber o cardapio
         # Period armazena se ira receber o cardapio semanalmente ou diariamente ou não receber
@@ -31,3 +36,4 @@ class DatabaseConnection:
         # campus armazena o campus do qual o usuario deseja saber o cardapio
         query = "CREATE TABLE IF NOT EXISTS images (id SERIAL PRIMARY KEY, weekNumber INTEGER, imgUrl TEXT, imgHtml TEXT, campus TEXT);"
         self.executeQuery(query)
+        self.cursor.close()
