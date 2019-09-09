@@ -14,14 +14,19 @@ class Utils:
 
     @staticmethod
     def getUsername(bot, update):
-        username = None
-        try:
-            username = update.message.from_user.first_name + ' '
-            if update.message.from_user.last_name: username += update.message.from_user.last_name
-        except:
-            username = update['callback_query']['message']['chat']['first_name'] + ' ' 
-            if update['callback_query']['message']['chat']['last_name']: username+= update['callback_query']['message']['chat']['last_name']
-        return username
+        chatType = update['callback_query']['message']['chat']['type']
+        chatName = 'DESCONHECIDO'
+        if chatType == 'private':
+            try:
+                chatName = update.message.from_user.first_name + ' '
+                if update.message.from_user.last_name: chatName += update.message.from_user.last_name
+            except:
+                chatName = update['callback_query']['message']['chat']['first_name'] + ' ' 
+                if update['callback_query']['message']['chat']['last_name']: chatName+= update['callback_query']['message']['chat']['last_name']
+        elif chatType == 'group':
+            return update['callback_query']['message']['chat']['title']
+        return chatName
+            
     
     @staticmethod
     def getWeekNumber():
