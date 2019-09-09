@@ -1,18 +1,20 @@
 import requests
-from bs4 import BeautifulSoup
-from datetime import datetime, date
 import time
 import os
 import re
 import telegram
-from conf.settings import htciId, htciKey
 import schedule
 import DatabaseConnection
+from bs4 import BeautifulSoup
+from datetime import datetime, date
+from conf.settings import htciId, htciKey
 from Utils import Utils
+from threading import Timer
 
 class RuBot:
     databaseConnection = DatabaseConnection.DatabaseConnection()
     dailyMenus = {}
+    menuAvailable = False
 
     def findWeek(self, soup):
         paragraphs = soup.find_all('p')
@@ -28,6 +30,10 @@ class RuBot:
         page = requests.get(URL_MENU_RU_CCO)
         soup = BeautifulSoup(page.text, 'html.parser')
         table = soup.find_all('table')
+
+        if not table:
+            return
+
         week = self.findWeek(soup)
         firstWeek = re.search(r'(\d+/\d+/\d+)', week[0].text).group(1).split('/')
         weekNumberToday = datetime.today().isocalendar()[1]
@@ -113,6 +119,14 @@ class RuBot:
         if imgToSend:
             bot.send_photo(chat_id=chatId, photo=imgToSend)
             print('Enviado cardápio para', Utils.getUsername(bot, update))
+        else:
+            bot.send_message(
+                chat_id = chatId,
+                text = "Desculpe-nos, o cardápio atualizado do RU ainda não foi publicado no site.\nTentaremos lhe enviar o cardápio novamente daqui 10 minutos.",
+                parse_mode = 'Markdown'
+            )
+            print("Tentando enviar cardápio novamente daqui a 15 min...")
+            Timer(900.0, self.showCardapio, [bot, update, campus]).start()
 
     def isInDataBase(self, chat_id, period):
         try:
@@ -167,32 +181,37 @@ class RuBot:
             print("unsubToPeriodicMenu: "+str(e)+"\n")
 
     def sendMenuToSubs(self, bot, period):
-        try:
-            query = "SELECT chat_id, username, campus FROM users WHERE period = '{}';".format(period)
-            users = self.databaseConnection.fetchAll(query)
-            for user in users:
-                chat_id = user[0]
-                username = user[1]
-                campus = user[2]
-                try: #Tenta enviar mensagem para o chat_id cadastrado
-                    if period == 'weekly':
-                        query = "SELECT imgUrl FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), campus)
-                        image = self.databaseConnection.fetchAll(query)
-                        bot.send_photo(
-                            chat_id=chat_id,
-                            photo=image[0][0]
-                        )
-                    elif period == 'daily':
-                        bot.send_message(
-                            chat_id=chat_id,
-                            text=self.getDailyMenu(campus)
-                        )
-                    print('Enviado', period, 'para', username)
-                except Exception as e:
-                    print("sendMenuToUser: "+str(e)+"\n")
+        if self.menuAvailable:
+            try:
+                query = "SELECT chat_id, username, campus FROM users WHERE period = '{}';".format(period)
+                users = self.databaseConnection.fetchAll(query)
+                for user in users:
+                    chat_id = user[0]
+                    username = user[1]
+                    campus = user[2]
+                    try: #Tenta enviar mensagem para o chat_id cadastrado
+                        if period == 'weekly':
+                            query = "SELECT imgUrl FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), campus)
+                            image = self.databaseConnection.fetchAll(query)
+                            bot.send_photo(
+                                chat_id=chat_id,
+                                photo=image[0][0]
+                            )
+                        elif period == 'daily':
+                            bot.send_message(
+                                chat_id=chat_id,
+                                text=self.getDailyMenu(campus)
+                            )
+                        print('Enviado', period, 'para', username)
+                    except Exception as e:
+                        print("sendMenuToUser: "+str(e)+"\n")
 
-        except Exception as e:
-            print("sendMenuToSubs: "+str(e)+"\n")
+            except Exception as e:
+                print("sendMenuToSubs: "+str(e)+"\n")
+
+        else:
+            print("Tentando enviar cardápio novamente daqui a 15 min...")
+            Timer(900.0, self.sendMenuToSubs, [bot, period]).start()
 
     def getDailyMenu(self, campus):
         try:
@@ -244,11 +263,17 @@ class RuBot:
         try:
             listOfCampus = ['chapeco', 'cerro-largo', 'erechim', 'laranjeiras-do-sul', 'realeza']
 
+            self.menuAvailable = True
+
             for i in range(len(listOfCampus)):
                 query = "SELECT * FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), listOfCampus[i])
                 image = self.databaseConnection.fetchAll(query)
                 if len(image) == 0:
-                    self.getMenu(listOfCampus[i])
+                    if not self.getMenu(listOfCampus[i]):
+                        print("Tentando baixar cardápio novamente daqui a 10 min...")
+                        Timer(600.0, self.getImages).start()
+                        self.menuAvailable = False
+
         except Exception as e:
             print("getImages: "+str(e)+"\n")
 
