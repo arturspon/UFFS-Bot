@@ -16,12 +16,13 @@ databaseConnection = DatabaseConnection.DatabaseConnection()
 
 def callHandler(bot, update):
     try:
-        print(update)
-        print(Utils.getChatType(bot, update))
-        print(Utils.isGroupAdmin(bot, update))
+        # print(update)
+        # print(Utils.getChatType(bot, update))
+        # print(Utils.isGroupAdmin(bot, update))
+        pass
     except Exception as err:
         print(err)
-    if Utils.getChatType(bot, update) == 'group' and not Utils.isGroupAdmin(bot, update):
+    if((Utils.getChatType(bot, update) == 'group' or Utils.getChatType(bot, update) == 'supergroup') and not Utils.isGroupAdmin(bot, update)):
         bot.send_message(
             chat_id = Utils.getChatId(bot, update),
             text = 'Desculpe, somente admins deste grupo podem usar o bot.',

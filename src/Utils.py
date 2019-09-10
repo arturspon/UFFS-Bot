@@ -1,5 +1,6 @@
 import telegram
 from datetime import datetime, date
+import json
 
 class Utils:
 
@@ -30,17 +31,31 @@ class Utils:
     @staticmethod
     def getAdminIds(bot, chatId):
         """Returns a list of admin IDs for a given chat. Results are cached for 1 hour."""
+        try:
+            print('testando ', bot.get_chat_administrators(chatId)[0])
+        except Exception as err:
+            print('DEU ERRO -> ', err)
         return [admin.user.id for admin in bot.get_chat_administrators(chatId)]
 
     @staticmethod
     def isGroupAdmin(bot, update):
-        if update.message.from_user and update.message.from_user.id in Utils.getAdminIds(bot, update.message.chat_id):
-            return True
+        try:
+            print(update)
+            if update.message.from_user.id in Utils.getAdminIds(bot, update.message.chat_id):
+                return True
+        except:
+            try:
+                if update['callback_query']['from']['id'] in Utils.getAdminIds(bot, update.message.chat_id):
+                    return True
+                pass
+            except:
+                if update['callback_query']['message']['from']['id'] in Utils.getAdminIds(bot, update.message.chat_id):
+                    return True
         return False
 
     @staticmethod
     def getChatType(bot, update):
-        return update['message']['chat']['type']
+        return update['callback_query']['message']['chat']['type']
     
     @staticmethod
     def getWeekNumber():
