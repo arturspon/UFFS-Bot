@@ -26,7 +26,21 @@ class Utils:
         elif chatType == 'group':
             return update['callback_query']['message']['chat']['title']
         return chatName
-            
+    
+    @staticmethod
+    def getAdminIds(bot, chatId):
+        """Returns a list of admin IDs for a given chat. Results are cached for 1 hour."""
+        return [admin.user.id for admin in bot.get_chat_administrators(chatId)]
+
+    @staticmethod
+    def isGroupAdmin(bot, update):
+        if update.message.from_user and update.message.from_user.id in Utils.getAdminIds(bot, update.message.chat_id):
+            return True
+        return False
+
+    @staticmethod
+    def getChatType(bot, update):
+        return update['message']['chat']['type']
     
     @staticmethod
     def getWeekNumber():
@@ -53,6 +67,10 @@ class Utils:
 
     @staticmethod
     def showStartMenu(bot, update):
+        try:
+            print(Utils.isGroupAdmin(bot, update))
+        except Exception as err:
+            print(err)
         bot.send_message(
             chat_id = Utils.getChatId(bot, update),
             text = '*\nSelecione uma opção para continuar...*',

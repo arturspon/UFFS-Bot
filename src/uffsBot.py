@@ -15,6 +15,20 @@ dateBot = DateBot.DateBot()
 databaseConnection = DatabaseConnection.DatabaseConnection()
 
 def callHandler(bot, update):
+    try:
+        print(update)
+        print(Utils.getChatType(bot, update))
+        print(Utils.isGroupAdmin(bot, update))
+    except Exception as err:
+        print(err)
+    if Utils.getChatType(bot, update) == 'group' and not Utils.isGroupAdmin(bot, update):
+        bot.send_message(
+            chat_id = Utils.getChatId(bot, update),
+            text = 'Desculpe, somente admins deste grupo podem usar o bot.',
+            parse_mode = 'Markdown'
+        )
+        return
+
     if update.callback_query.data == 'menu-ru':
         ruBot.selectCampus(bot, update)
 
