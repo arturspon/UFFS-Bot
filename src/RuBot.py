@@ -14,7 +14,6 @@ from threading import Timer
 class RuBot:
     databaseConnection = DatabaseConnection.DatabaseConnection()
     dailyMenus = {}
-    menuAvailable = False
 
     def findWeek(self, soup):
         paragraphs = soup.find_all('p')
@@ -181,7 +180,10 @@ class RuBot:
             print("unsubToPeriodicMenu: "+str(e)+"\n")
 
     def sendMenuToSubs(self, bot, period):
-        if self.menuAvailable:
+        query = "SELECT value FROM status WHERE description = 'menuAvailable';"
+        results = self.databaseConnection.fetchAll(query)
+        menuAvailable = results[0]
+        if menuAvailable:
             try:
                 query = "SELECT chat_id, username, campus FROM users WHERE period = '{}';".format(period)
                 users = self.databaseConnection.fetchAll(query)
@@ -263,7 +265,8 @@ class RuBot:
         try:
             listOfCampus = ['chapeco', 'cerro-largo', 'erechim', 'laranjeiras-do-sul', 'realeza']
 
-            self.menuAvailable = True
+            query = "UPDATE status SET value = '{}' WHERE description = '{}';".format(True, 'menuAvailable')
+            self.databaseConnection.executeQuery(query)
 
             for i in range(len(listOfCampus)):
                 query = "SELECT * FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), listOfCampus[i])
@@ -272,7 +275,9 @@ class RuBot:
                     if not self.getMenu(listOfCampus[i]):
                         print("Tentando baixar cardápio novamente daqui a 10 min...")
                         Timer(600.0, self.getImages).start()
-                        self.menuAvailable = False
+                        query = "UPDATE status SET value = '{}' WHERE description = '{}';".format(False, 'menuAvailable')
+                        self.databaseConnection.executeQuery(query)
+
 
         except Exception as e:
             print("getImages: "+str(e)+"\n")

@@ -36,4 +36,7 @@ class DatabaseConnection:
         # campus armazena o campus do qual o usuario deseja saber o cardapio
         query = "CREATE TABLE IF NOT EXISTS images (id SERIAL PRIMARY KEY, weekNumber INTEGER, imgUrl TEXT, imgHtml TEXT, campus TEXT);"
         self.executeQuery(query)
+        # Tabela criada para checar o status do cardápio
+        query = "CREATE TABLE IF NOT EXISTS status (id SERIAL PRIMARY KEY, description TEXT, value BOOLEAN);"
+        self.executeQuery(query)
         self.cursor.close()
