@@ -146,7 +146,7 @@ class RuBot:
             chat_id = Utils.getChatId(bot, update)
             username = Utils.getUsername(bot, update)
             if self.isInDataBase(chat_id, period):
-                query = "UPDATE users SET campus = '{}', period = '{}', username = '{}' WHERE chat_id = '{}';".format(campus, period, username, chat_id)
+                query = "UPDATE users SET campus = '{}', period = '{}', username = '{}' WHERE chat_id = '{}' AND period = '{}';".format(campus, period, username, chat_id, period)
             else:
                 query = "INSERT INTO users (chat_id, username, campus, period) VALUES ('{}', '{}', '{}', '{}');".format(str(chat_id), username, campus, period)
 
