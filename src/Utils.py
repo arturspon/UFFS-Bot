@@ -26,6 +26,13 @@ class Utils:
         elif chatType == 'group':
             return update['callback_query']['message']['chat']['title']
         return chatName
+
+    @staticmethod
+    def getUserFirstName(bot, update):
+        try:
+            return update['callback_query']['from_user']['first_name']
+        except:
+            return 'parça'
     
     @staticmethod
     def getAdminIds(bot, chatId):

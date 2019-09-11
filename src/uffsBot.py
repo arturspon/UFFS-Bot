@@ -19,7 +19,7 @@ def callHandler(bot, update):
     if((chatType == 'group' or chatType == 'supergroup') and not Utils.isGroupAdmin(bot, update)):
         bot.send_message(
             chat_id = Utils.getChatId(bot, update),
-            text = 'Desculpe, somente admins deste grupo podem usar o bot. Para utilizar o bot, inicie uma conversa privada com @UFFS_Bot'
+            text = 'Foi mal ' + Utils.getUserFirstName(bot, update) + ', somente admins deste grupo podem usar o bot. Se quiser utilizar o bot, chama no privado @UFFS_Bot'
         )
         return
 
