@@ -1,6 +1,5 @@
 import telegram
 from datetime import datetime, date
-import json
 
 class Utils:
 
@@ -8,19 +7,19 @@ class Utils:
     def getChatId(bot, update):
         chatId = None
         try:
-            chatId = update.message.chat_id
+            chatId = update['message']['chat_id']
         except:
             chatId = update['callback_query']['message']['chat']['id']
         return chatId
 
     @staticmethod
     def getUsername(bot, update):
-        chatType = update['callback_query']['message']['chat']['type']
+        chatType = Utils.getChatType(bot, update)
         chatName = 'DESCONHECIDO'
         if chatType == 'private':
             try:
-                chatName = update.message.from_user.first_name + ' '
-                if update.message.from_user.last_name: chatName += update.message.from_user.last_name
+                chatName = update['message']['from_user']['first_name'] + ' '
+                if update['message']['from_user']['last_name']: chatName += update['message']['from_user']['last_name']
             except:
                 chatName = update['callback_query']['message']['chat']['first_name'] + ' ' 
                 if update['callback_query']['message']['chat']['last_name']: chatName+= update['callback_query']['message']['chat']['last_name']
@@ -31,26 +30,16 @@ class Utils:
     @staticmethod
     def getAdminIds(bot, chatId):
         """Returns a list of admin IDs for a given chat. Results are cached for 1 hour."""
-        try:
-            print('testando ', bot.get_chat_administrators(chatId)[0])
-        except Exception as err:
-            print('DEU ERRO -> ', err)
-        return [admin.user.id for admin in bot.get_chat_administrators(chatId)]
+        return [admin['user']['id'] for admin in bot.get_chat_administrators(chatId)]
 
     @staticmethod
     def isGroupAdmin(bot, update):
         try:
-            print(update)
-            if update.message.from_user.id in Utils.getAdminIds(bot, update.message.chat_id):
+            if update['message']['from_user']['id']:
                 return True
         except:
-            try:
-                if update['callback_query']['from']['id'] in Utils.getAdminIds(bot, update.message.chat_id):
-                    return True
-                pass
-            except:
-                if update['callback_query']['message']['from']['id'] in Utils.getAdminIds(bot, update.message.chat_id):
-                    return True
+            if update['callback_query']['from_user']['id'] in Utils.getAdminIds(bot, update['callback_query']['message']['chat']['id']):
+                return True
         return False
 
     @staticmethod
@@ -82,10 +71,6 @@ class Utils:
 
     @staticmethod
     def showStartMenu(bot, update):
-        try:
-            print(Utils.isGroupAdmin(bot, update))
-        except Exception as err:
-            print(err)
         bot.send_message(
             chat_id = Utils.getChatId(bot, update),
             text = '*\nSelecione uma opção para continuar...*',
