@@ -7,26 +7,44 @@ class Utils:
     def getChatId(bot, update):
         chatId = None
         try:
-            chatId = update.message.chat_id
+            chatId = update['message']['chat_id']
         except:
             chatId = update['callback_query']['message']['chat']['id']
         return chatId
 
     @staticmethod
     def getUsername(bot, update):
-        chatType = update['callback_query']['message']['chat']['type']
+        chatType = Utils.getChatType(bot, update)
         chatName = 'DESCONHECIDO'
         if chatType == 'private':
             try:
-                chatName = update.message.from_user.first_name + ' '
-                if update.message.from_user.last_name: chatName += update.message.from_user.last_name
+                chatName = update['message']['from_user']['first_name'] + ' '
+                if update['message']['from_user']['last_name']: chatName += update['message']['from_user']['last_name']
             except:
                 chatName = update['callback_query']['message']['chat']['first_name'] + ' ' 
                 if update['callback_query']['message']['chat']['last_name']: chatName+= update['callback_query']['message']['chat']['last_name']
         elif chatType == 'group':
             return update['callback_query']['message']['chat']['title']
         return chatName
-            
+    
+    @staticmethod
+    def getAdminIds(bot, chatId):
+        """Returns a list of admin IDs for a given chat. Results are cached for 1 hour."""
+        return [admin['user']['id'] for admin in bot.get_chat_administrators(chatId)]
+
+    @staticmethod
+    def isGroupAdmin(bot, update):
+        try:
+            if update['message']['from_user']['id']:
+                return True
+        except:
+            if update['callback_query']['from_user']['id'] in Utils.getAdminIds(bot, update['callback_query']['message']['chat']['id']):
+                return True
+        return False
+
+    @staticmethod
+    def getChatType(bot, update):
+        return update['callback_query']['message']['chat']['type']
     
     @staticmethod
     def getWeekNumber():

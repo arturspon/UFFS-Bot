@@ -15,6 +15,14 @@ dateBot = DateBot.DateBot()
 databaseConnection = DatabaseConnection.DatabaseConnection()
 
 def callHandler(bot, update):
+    chatType = Utils.getChatType(bot, update)
+    if((chatType == 'group' or chatType == 'supergroup') and not Utils.isGroupAdmin(bot, update)):
+        bot.send_message(
+            chat_id = Utils.getChatId(bot, update),
+            text = 'Desculpe, somente admins deste grupo podem usar o bot. Para utilizar o bot, inicie uma conversa privada com @UFFS_Bot'
+        )
+        return
+
     if update.callback_query.data == 'menu-ru':
         ruBot.selectCampus(bot, update)
 
@@ -79,7 +87,6 @@ def main():
     dp.add_handler(CommandHandler('start', Utils.showStartMenu))
     dp.add_handler(CommandHandler('auto', ruBot.subToPeriodicMenu))
     dp.add_handler(CommandHandler('autoCancel', ruBot.unsubToPeriodicMenu))
-    dp.add_handler(CommandHandler('cal_academico', calendarBot.getCalendar))
     dp.add_handler(CallbackQueryHandler(callHandler))
     thread = threading.Thread(target = ruBot.sendMenuPeriodically, args = (bot,))
     thread.start()
