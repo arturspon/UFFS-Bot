@@ -195,10 +195,30 @@ class RuBot:
                         if period == 'weekly':
                             query = "SELECT imgUrl FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), campus)
                             image = self.databaseConnection.fetchAll(query)
-                            bot.send_photo(
-                                chat_id=chat_id,
-                                photo=image[0][0]
-                            )
+
+                            try:
+                                msgSent = bot.send_photo(
+                                    chat_id = chat_id,
+                                    photo = image[0][0]
+                                )
+                            except telegram.error.ChatMigrated as chatMigratedError:
+                                print('Grupo mudou de id, atualizando informação no banco...')
+                                self.databaseConnection.executeQuery("UPDATE users SET chat_id = {} WHERE chat_id = {};".format(chatMigratedError.new_chat_id, chat_id))
+                                chat_id = chatMigratedError.new_chat_id
+                                msgSent = bot.send_photo(
+                                    chat_id = chat_id,
+                                    photo = image[0][0]
+                                )
+
+                            try:
+                                bot.pin_chat_message(
+                                    chat_id = chat_id,
+                                    message_id = msgSent.message_id,
+                                    disable_notification = None
+                                )
+                            except Exception as errPinMsg:
+                                print('O bot tentou fixar o cardápio porém não tem permissão para isso -> ', errPinMsg)
+
                         elif period == 'daily':
                             bot.send_message(
                                 chat_id=chat_id,
@@ -284,17 +304,17 @@ class RuBot:
 
     def sendMenuPeriodically(self, bot):
         try:
-            # Download do cardápio toda segundas às 08h caso já não tenha sido baixado
+            # Download do cardápio toda segunda às 08h caso já não tenha sido baixado
             schedule.every().monday.at('08:00').do(self.getImages)
 
-            #Todo dias as 09:00 manda o cardaio para os cadastrados
+            # Todos os dias às 09:00 manda o cardápio para os cadastrados
             schedule.every().monday.at('09:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().tuesday.at('09:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().wednesday.at('09:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().thursday.at('09:00').do(self.sendMenuToSubs, bot, "daily")
             schedule.every().friday.at('09:00').do(self.sendMenuToSubs, bot, "daily")
 
-            #Toda segunda as 09:00 manda o cardapio para os cadastrados
+            # Toda segunda às 09:00 manda o cardápio para os cadastrados
             schedule.every().monday.at('09:00').do(self.sendMenuToSubs, bot, "weekly")
 
             while True:
