@@ -17,9 +17,10 @@ databaseConnection = DatabaseConnection.DatabaseConnection()
 def callHandler(bot, update):
     chatType = Utils.getChatType(bot, update)
     if((chatType == 'group' or chatType == 'supergroup') and not Utils.isGroupAdmin(bot, update)):
-        bot.send_message(
-            chat_id = Utils.getChatId(bot, update),
-            text = 'Foi mal ' + Utils.getUserFirstName(bot, update) + ', somente admins deste grupo podem usar o bot. Se quiser utilizar o bot, chama no privado @UFFS_Bot'
+        bot.answerCallbackQuery(
+            callback_query_id = update['callback_query']['id'], 
+            text = 'Foi mal ' + Utils.getUserFirstName(bot, update) + ', somente admins deste grupo podem usar o bot. Se quiser utilizar o bot, chama no privado @UFFS_Bot',
+            show_alert = True
         )
         return
 
