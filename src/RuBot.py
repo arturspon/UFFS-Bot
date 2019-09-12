@@ -195,10 +195,21 @@ class RuBot:
                         if period == 'weekly':
                             query = "SELECT imgUrl FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), campus)
                             image = self.databaseConnection.fetchAll(query)
-                            bot.send_photo(
+
+                            msgSent = bot.send_photo(
                                 chat_id=chat_id,
                                 photo=image[0][0]
                             )
+
+                            try:
+                                bot.pin_chat_message(
+                                    chat_id = chat_id,
+                                    message_id = msgSent.message_id,
+                                    disable_notification = None
+                                )
+                            except Exception as errPinMsg:
+                                print('O bot tentou fixar o cardápio porém não tem permissão para isso -> ', errPinMsg)
+
                         elif period == 'daily':
                             bot.send_message(
                                 chat_id=chat_id,
