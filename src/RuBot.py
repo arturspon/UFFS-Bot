@@ -244,7 +244,11 @@ class RuBot:
                 soup = BeautifulSoup(image[0][0], 'html.parser')
                 column = ''
                 for row in soup.findAll('table')[0].tbody.findAll('tr'):
-                    column = column + '\n' + row.findAll('td')[date.today().weekday()].p.text
+                    cell = row.findAll('td')[date.today().weekday()].findAll('p')
+                    text = ''
+                    for line in cell:
+                        text = text + line.text + ' '
+                    column = column + '\n' + text
                 self.dailyMenus[today] = column
             return self.dailyMenus[today]
         except Exception as e:
