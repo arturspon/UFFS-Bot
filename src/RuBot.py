@@ -220,10 +220,21 @@ class RuBot:
                                 print('O bot tentou fixar o cardápio porém não tem permissão para isso -> ', errPinMsg)
 
                         elif period == 'daily':
-                            bot.send_message(
-                                chat_id=chat_id,
-                                text=self.getDailyMenu(campus)
-                            )
+                            try:
+                                bot.send_message(
+                                    chat_id=chat_id,
+                                    text=self.getDailyMenu(campus),
+                                    parse_mode = 'Markdown'
+                                )
+                            except telegram.error.ChatMigrated as chatMigratedError:
+                                print('Grupo mudou de id, atualizando informação no banco...')
+                                self.databaseConnection.executeQuery("UPDATE users SET chat_id = {} WHERE chat_id = {};".format(chatMigratedError.new_chat_id, chat_id))
+                                chat_id = chatMigratedError.new_chat_id
+                                bot.send_message(
+                                    chat_id=chat_id,
+                                    text=self.getDailyMenu(campus),
+                                    parse_mode = 'Markdown'
+                                )
                         print('Enviado', period, 'para', username)
                     except Exception as e:
                         print("sendMenuToUser: "+str(e)+"\n")
@@ -242,13 +253,16 @@ class RuBot:
                 query = "SELECT imgHtml FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), campus)
                 image = self.databaseConnection.fetchAll(query)
                 soup = BeautifulSoup(image[0][0], 'html.parser')
-                column = ''
-                for row in soup.findAll('table')[0].tbody.findAll('tr'):
+                column = '*O cardápio de '
+                for i, row in enumerate(soup.findAll('table')[0].tbody.findAll('tr')):
                     cell = row.findAll('td')[date.today().weekday()].findAll('p')
                     text = ''
                     for line in cell:
                         text = text + line.text + ' '
-                    column = column + '\n' + text
+                    if(i == 0):
+                        column += text.lower() + 'será:*'
+                        continue
+                    column += '\n' + text
                 self.dailyMenus[today] = column
             return self.dailyMenus[today]
         except Exception as e:
