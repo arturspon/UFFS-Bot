@@ -60,7 +60,7 @@ class DateBot:
         count = 0
 
         # ------- remove os meses sem informações
-        for i in results:                 
+        for i in results:
             if(self.checkMonth(results[count]) == True):
 
                 if(self.checkGradu(results[count + 1]) == True):
@@ -104,7 +104,7 @@ class DateBot:
                 telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
-            
+
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
 
         bot.editMessageText(

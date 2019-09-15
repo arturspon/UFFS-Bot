@@ -35,7 +35,7 @@ class EventsBot:
         eventList.sort(key=lambda x: x[3])
         return self.formatList(eventList)
 
-    def showEvents(self, bot, update):        
+    def showEvents(self, bot, update):
         message = self.getEvents()
         bot.send_message(
             chat_id = Utils.getChatId(bot, update),

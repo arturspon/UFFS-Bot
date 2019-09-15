@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import telegram
 from Utils import Utils
 
 class CalendarBot:
@@ -58,5 +57,5 @@ class CalendarBot:
                 open('calendario-academico.pdf', 'wb').write(calendar.content)
                 self.isCalendarInCache = True
                 return True
-                
+
         return False

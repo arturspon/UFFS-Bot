@@ -1,5 +1,5 @@
 import telegram
-from datetime import datetime, date
+from datetime import datetime
 
 class Utils:
 
@@ -21,7 +21,7 @@ class Utils:
                 chatName = update['message']['from_user']['first_name'] + ' '
                 if update['message']['from_user']['last_name']: chatName += update['message']['from_user']['last_name']
             except:
-                chatName = update['callback_query']['message']['chat']['first_name'] + ' ' 
+                chatName = update['callback_query']['message']['chat']['first_name'] + ' '
                 if update['callback_query']['message']['chat']['last_name']: chatName+= update['callback_query']['message']['chat']['last_name']
         elif chatType == 'group':
             return update['callback_query']['message']['chat']['title']
@@ -52,7 +52,7 @@ class Utils:
     @staticmethod
     def getChatType(bot, update):
         return update['callback_query']['message']['chat']['type']
-    
+
     @staticmethod
     def getWeekNumber():
         return datetime.today().isocalendar()[1]
