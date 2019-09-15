@@ -1,4 +1,6 @@
 # UFFS-Bot
+[![](https://tokei.rs/b1/github/arturspon/UFFS-Bot?category=code)](https://github.com/arturspon/UFFS-Bot)
+[![](https://img.shields.io/github/issues-raw/arturspon/UFFS-Bot.svg)](https://github.com/arturspon/UFFS-Bot/issues)
 
 Um bot do Telegram para ajudar estudantes da UFFS no dia a dia.
 
