@@ -8,7 +8,7 @@ class CalendarBot:
 
     def getCalendar(self, bot, update):
         chatId = Utils.getChatId(bot, update)
-        
+
         bot.sendMessage(
             chatId,
             '*Só um segundo...*',

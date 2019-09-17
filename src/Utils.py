@@ -33,7 +33,7 @@ class Utils:
             return update['callback_query']['from_user']['first_name']
         except:
             return 'parça'
-    
+
     @staticmethod
     def getAdminIds(bot, chatId):
         """Returns a list of admin IDs for a given chat. Results are cached for 1 hour."""

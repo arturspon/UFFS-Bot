@@ -54,7 +54,7 @@ class BusBot:
                 if line == 'uffs':
                     fromTerminal = False
                     continue
-                
+
                 if isWeek is not None and fromTerminal is not None and line:
                     if isWeek:
                         if fromTerminal:

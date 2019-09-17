@@ -335,14 +335,14 @@ class RuBot:
                 [True, 'menuAvailable']
             )
 
-            for i in range(len(listOfCampus)):
+            for campus in listOfCampus:
                 image = self.databaseConnection.fetchAll(
                     "SELECT * FROM images WHERE weekNumber = %s AND campus = %s;",
-                    [Utils.getWeekNumber(), listOfCampus[i]]
+                    [Utils.getWeekNumber(), campus]
                 )
                 if len(image) == 0:
-                    print('Tentando baixar o cardápio de', listOfCampus[i])
-                    if not self.getMenu(listOfCampus[i]):
+                    print('Tentando baixar o cardápio de', campus)
+                    if not self.getMenu(campus):
                         print("Tentando baixar cardápio novamente daqui a 10 min...")
                         Timer(600.0, self.getImages).start()
                         self.databaseConnection.executeQuery(

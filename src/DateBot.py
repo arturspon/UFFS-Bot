@@ -9,7 +9,7 @@ class DateBot:
     def checkMonth(self, raw):
         for char in "*\n":
             raw = raw.replace(char, '')
-        
+
         if(raw == "JANEIRO" or raw == "FEVEREIRO" or raw == "MARÇO" or raw == "ABRIL" or raw == "MAIO" or raw == "JUNHO" or raw == "JULHO" or raw == "AGOSTO" or raw == "SETEMBRO" or raw == "OUTUBRO" or raw == "NOVEMBRO" or raw == "DEZEMBRO"):
             return True
         else:
@@ -35,10 +35,10 @@ class DateBot:
             return True
         else:
             return False
-       
+
 
     def searchTerm(self, bot, update, term):
-        
+
         rawText = parser.from_file('./calendario-academico.pdf')
         rawList = rawText['content'].splitlines()
 
@@ -77,7 +77,7 @@ class DateBot:
                         results.pop(count)
                         results.pop(count)
                         count-=1
-                                    
+
             count += 1
 
         separator = '\n'
