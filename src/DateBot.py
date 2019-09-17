@@ -9,7 +9,7 @@ class DateBot:
     def checkMonth(self, raw):
         for char in "*\n":
             raw = raw.replace(char, '')
-        
+
         if(raw == "JANEIRO" or raw == "FEVEREIRO" or raw == "MARÇO" or raw == "ABRIL" or raw == "MAIO" or raw == "JUNHO" or raw == "JULHO" or raw == "AGOSTO" or raw == "SETEMBRO" or raw == "OUTUBRO" or raw == "NOVEMBRO" or raw == "DEZEMBRO"):
             return True
         else:
@@ -35,10 +35,10 @@ class DateBot:
             return True
         else:
             return False
-       
+
 
     def searchTerm(self, bot, update, term):
-        
+
         rawText = parser.from_file('./calendario-academico.pdf')
         rawList = rawText['content'].splitlines()
 
@@ -60,7 +60,7 @@ class DateBot:
         count = 0
 
         # ------- remove os meses sem informações
-        for i in results:                 
+        for i in results:
             if(self.checkMonth(results[count]) == True):
 
                 if(self.checkGradu(results[count + 1]) == True):
@@ -77,7 +77,7 @@ class DateBot:
                         results.pop(count)
                         results.pop(count)
                         count-=1
-                                    
+
             count += 1
 
         separator = '\n'
@@ -104,7 +104,7 @@ class DateBot:
                 telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
-            
+
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
 
         bot.editMessageText(

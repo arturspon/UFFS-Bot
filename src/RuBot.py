@@ -1,6 +1,5 @@
 import requests
 import time
-import os
 import re
 import telegram
 import schedule
@@ -10,6 +9,7 @@ from datetime import datetime, date
 from conf.settings import htciId, htciKey
 from Utils import Utils
 from threading import Timer
+from psycopg2 import sql
 
 class RuBot:
     databaseConnection = DatabaseConnection.DatabaseConnection()
@@ -44,8 +44,10 @@ class RuBot:
 
         img = requests.post('https://hcti.io/v1/image', data = {'HTML': html}, auth=(htciId, htciKey))
         imgUrl = img.text.split('"')[3]
-        query = "INSERT INTO images (weekNumber, imgUrl, imgHtml, campus) VALUES ({}, '{}', '{}', '{}');".format(weekNumberToday, imgUrl, html, campus)
-        self.databaseConnection.executeQuery(query)
+        self.databaseConnection.executeQuery(
+            sql.SQL("INSERT INTO images (weekNumber, imgUrl, imgHtml, campus) VALUES (%s, %s, %s, %s)"),
+            [weekNumberToday, imgUrl, html, campus]
+        )
         print('Inserido nova imagem ao banco\nweekNumber: ', Utils.getWeekNumber(), '\tCampus: ', campus)
 
         return imgUrl
@@ -106,8 +108,10 @@ class RuBot:
     def showCardapio(self, bot, update, campus):
         chatId = Utils.getChatId(bot, update)
 
-        query = "SELECT imgUrl FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), campus)
-        image = self.databaseConnection.fetchAll(query)
+        image = self.databaseConnection.fetchAll(
+            sql.SQL("SELECT imgUrl FROM images WHERE weekNumber = %s AND campus = %s;"),
+            [Utils.getWeekNumber(), campus]
+        )
 
         if len(image):
             imgToSend = image[0][0]
@@ -129,8 +133,10 @@ class RuBot:
 
     def isInDataBase(self, chat_id, period):
         try:
-            query = "SELECT chat_id FROM users WHERE chat_id = '{}' AND period = '{}';".format(str(chat_id), period)
-            users = self.databaseConnection.fetchAll(query)
+            users = self.databaseConnection.fetchAll(
+                sql.SQL("SELECT chat_id FROM users WHERE chat_id = %s AND period = %s;"),
+                [chat_id, period]
+            )
             if len(users):
                 return True
             else:
@@ -146,11 +152,16 @@ class RuBot:
             chat_id = Utils.getChatId(bot, update)
             username = Utils.getUsername(bot, update)
             if self.isInDataBase(chat_id, period):
-                query = "UPDATE users SET campus = '{}', period = '{}', username = '{}' WHERE chat_id = '{}' AND period = '{}';".format(campus, period, username, chat_id, period)
+                self.databaseConnection.executeQuery(
+                    sql.SQL("UPDATE users SET campus = %s, period = %s, username = %s WHERE chat_id = %s AND period = %s;"),
+                    [campus, period, username, chat_id, period]
+                )
             else:
-                query = "INSERT INTO users (chat_id, username, campus, period) VALUES ('{}', '{}', '{}', '{}');".format(str(chat_id), username, campus, period)
+                self.databaseConnection.executeQuery(
+                    sql.SQL("INSERT INTO users (chat_id, username, campus, period) VALUES (%s, %s, %s, %s)"),
+                    [chat_id, username, campus, period]
+                )
 
-            self.databaseConnection.executeQuery(query)
 
             message = 'Cardápio ' + Utils.getPeriodFormated(period) + ' ativado para ' + Utils.getCampusFormated(campus) + '\nCardápio desta semana:'
             bot.send_message(
@@ -166,8 +177,10 @@ class RuBot:
     def unsubToPeriodicMenu(self, bot, update):
         try:
             chat_id = Utils.getChatId(bot, update)
-            query = "DELETE FROM users WHERE chat_id = '{}';".format(chat_id)
-            self.databaseConnection.executeQuery(query)
+            self.databaseConnection.executeQuery(
+                sql.SQL("DELETE FROM users WHERE chat_id = %s;"),
+                [chat_id]
+            )
 
             bot.send_message(
                 chat_id=chat_id,
@@ -180,21 +193,27 @@ class RuBot:
             print("unsubToPeriodicMenu: "+str(e)+"\n")
 
     def sendMenuToSubs(self, bot, period):
-        query = "SELECT value FROM status WHERE description = 'menuAvailable';"
-        results = self.databaseConnection.fetchAll(query)
+        results = self.databaseConnection.fetchAll(
+            "SELECT value FROM status WHERE description = %s;",
+            ['menuAvailable']
+        )
         menuAvailable = results[0]
         if menuAvailable:
             try:
-                query = "SELECT chat_id, username, campus FROM users WHERE period = '{}';".format(period)
-                users = self.databaseConnection.fetchAll(query)
+                users = self.databaseConnection.fetchAll(
+                    "SELECT chat_id, username, campus FROM users WHERE period = %s;",
+                    [period]
+                )
                 for user in users:
                     chat_id = user[0]
                     username = user[1]
                     campus = user[2]
-                    try: #Tenta enviar mensagem para o chat_id cadastrado
+                    try: # Tenta enviar mensagem para o chat_id cadastrado
                         if period == 'weekly':
-                            query = "SELECT imgUrl FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), campus)
-                            image = self.databaseConnection.fetchAll(query)
+                            image = self.databaseConnection.fetchAll(
+                                "SELECT imgUrl FROM images WHERE weekNumber = %s AND campus = %s;",
+                                [Utils.getWeekNumber(), campus]
+                            )
 
                             try:
                                 msgSent = bot.send_photo(
@@ -203,7 +222,10 @@ class RuBot:
                                 )
                             except telegram.error.ChatMigrated as chatMigratedError:
                                 print('Grupo mudou de id, atualizando informação no banco...')
-                                self.databaseConnection.executeQuery("UPDATE users SET chat_id = {} WHERE chat_id = {};".format(chatMigratedError.new_chat_id, chat_id))
+                                self.databaseConnection.executeQuery(
+                                    sql.SQL("UPDATE users SET chat_id = %s WHERE chat_id = %s;"),
+                                    [chatMigratedError.new_chat_id, chat_id]
+                                )
                                 chat_id = chatMigratedError.new_chat_id
                                 msgSent = bot.send_photo(
                                     chat_id = chat_id,
@@ -228,7 +250,10 @@ class RuBot:
                                 )
                             except telegram.error.ChatMigrated as chatMigratedError:
                                 print('Grupo mudou de id, atualizando informação no banco...')
-                                self.databaseConnection.executeQuery("UPDATE users SET chat_id = {} WHERE chat_id = {};".format(chatMigratedError.new_chat_id, chat_id))
+                                self.databaseConnection.executeQuery(
+                                    sql.SQL("UPDATE users SET chat_id = %s WHERE chat_id = %s;"),
+                                    [chatMigratedError.new_chat_id, chat_id]
+                                )
                                 chat_id = chatMigratedError.new_chat_id
                                 bot.send_message(
                                     chat_id=chat_id,
@@ -250,8 +275,10 @@ class RuBot:
         try:
             today = str(Utils.getWeekNumber()) + campus + str(date.today().weekday())
             if today not in self.dailyMenus:
-                query = "SELECT imgHtml FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), campus)
-                image = self.databaseConnection.fetchAll(query)
+                image = self.databaseConnection.fetchAll(
+                    "SELECT imgHtml FROM images WHERE weekNumber = %s AND campus = %s;",
+                    [Utils.getWeekNumber(), campus]
+                )
                 soup = BeautifulSoup(image[0][0], 'html.parser')
                 column = '*O cardápio de '
                 for i, row in enumerate(soup.findAll('table')[0].tbody.findAll('tr')):
@@ -303,20 +330,25 @@ class RuBot:
         try:
             listOfCampus = ['chapeco', 'cerro-largo', 'erechim', 'laranjeiras-do-sul', 'realeza']
 
-            query = "UPDATE status SET value = '{}' WHERE description = '{}';".format(True, 'menuAvailable')
-            self.databaseConnection.executeQuery(query)
+            self.databaseConnection.executeQuery(
+                sql.SQL("UPDATE status SET value = %s WHERE description = %s;"),
+                [True, 'menuAvailable']
+            )
 
-            for i in range(len(listOfCampus)):
-                query = "SELECT * FROM images WHERE weekNumber = {} AND campus = '{}';".format(Utils.getWeekNumber(), listOfCampus[i])
-                image = self.databaseConnection.fetchAll(query)
+            for campus in listOfCampus:
+                image = self.databaseConnection.fetchAll(
+                    "SELECT * FROM images WHERE weekNumber = %s AND campus = %s;",
+                    [Utils.getWeekNumber(), campus]
+                )
                 if len(image) == 0:
-                    if not self.getMenu(listOfCampus[i]):
+                    print('Tentando baixar o cardápio de', campus)
+                    if not self.getMenu(campus):
                         print("Tentando baixar cardápio novamente daqui a 10 min...")
                         Timer(600.0, self.getImages).start()
-                        query = "UPDATE status SET value = '{}' WHERE description = '{}';".format(False, 'menuAvailable')
-                        self.databaseConnection.executeQuery(query)
-
-
+                        self.databaseConnection.executeQuery(
+                            sql.SQL("UPDATE status SET value = %s WHERE description = %s;"),
+                            [False, 'menuAvailable']
+                        )
         except Exception as e:
             print("getImages: "+str(e)+"\n")
 

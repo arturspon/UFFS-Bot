@@ -22,6 +22,6 @@ class CanteenBot:
             reply_markup = replyMarkup
         )
 
-    def showCardapio(self, bot, update):        
+    def showCardapio(self, bot, update):
         imgToSend = 'https://i.imgur.com/ec3Rvub.png'
         bot.send_photo(chat_id = Utils.getChatId(bot, update), photo = imgToSend)

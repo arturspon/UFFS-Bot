@@ -1,4 +1,3 @@
-import os
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 import telegram
 from Utils import Utils
@@ -18,7 +17,7 @@ def callHandler(bot, update):
     chatType = Utils.getChatType(bot, update)
     if((chatType == 'group' or chatType == 'supergroup') and not Utils.isGroupAdmin(bot, update)):
         bot.answerCallbackQuery(
-            callback_query_id = update['callback_query']['id'], 
+            callback_query_id = update['callback_query']['id'],
             text = 'Foi mal ' + Utils.getUserFirstName(bot, update) + ', somente admins deste grupo podem usar o bot. Se quiser utilizar o bot, chama no privado @UFFS_Bot',
             show_alert = True
         )

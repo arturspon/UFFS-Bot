@@ -10,16 +10,16 @@ class DatabaseConnection:
         except Exception as e:
             print('Não foi possível conectar ao database: ', e)
 
-    def fetchAll(self, query):
+    def fetchAll(self, query, args):
         self.cursor = self.conn.cursor()
-        self.cursor.execute(query)
+        self.cursor.execute(query, args)
         results = self.cursor.fetchall()
         self.cursor.close()
         return results
 
-    def executeQuery(self, query):
+    def executeQuery(self, query, args):
         self.cursor = self.conn.cursor()
-        self.cursor.execute(query)
+        self.cursor.execute(query, args)
         self.cursor.close()
 
     def createTables(self):
@@ -28,15 +28,15 @@ class DatabaseConnection:
         # campus armazena o campus do qual o usuario deseja saber o cardapio
         # Period armazena se ira receber o cardapio semanalmente ou diariamente ou não receber
         query = "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, chat_id BIGINT, username TEXT, campus TEXT, period TEXT);"
-        self.executeQuery(query)
+        self.cursor.execute(query)
         # Cria tabela para armazenar os links das imagens usados para exibir o cardápio
         # weekNumber armazena o dia da semana da url criada
         # imgUrl armazena o url da imagem criada
         # imgHtml armazena o html da tabela que virou imagem
         # campus armazena o campus do qual o usuario deseja saber o cardapio
         query = "CREATE TABLE IF NOT EXISTS images (id SERIAL PRIMARY KEY, weekNumber INTEGER, imgUrl TEXT, imgHtml TEXT, campus TEXT);"
-        self.executeQuery(query)
+        self.cursor.execute(query)
         # Tabela criada para checar o status do cardápio
         query = "CREATE TABLE IF NOT EXISTS status (id SERIAL PRIMARY KEY, description TEXT, value BOOLEAN);"
-        self.executeQuery(query)
+        self.cursor.execute(query)
         self.cursor.close()

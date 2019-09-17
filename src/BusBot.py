@@ -54,7 +54,7 @@ class BusBot:
                 if line == 'uffs':
                     fromTerminal = False
                     continue
-                
+
                 if isWeek is not None and fromTerminal is not None and line:
                     if isWeek:
                         if fromTerminal:
@@ -73,7 +73,7 @@ class BusBot:
         keyboard = [
             [
                 telegram.InlineKeyboardButton('Campus Chapecó', callback_data = 'bus-cco'),
-                telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro')                
+                telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro')
             ],
             [
                 telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim'),
@@ -87,7 +87,7 @@ class BusBot:
                 telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
             ]
         ]
-            
+
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
 
         bot.editMessageText(
@@ -148,5 +148,5 @@ class BusBot:
             formattedText = '*Horários de saída dos ônibus do(a) ' + startPoint.upper() + ' em ' + self.citiesFullName[city] + ':*\n'
 
         for schedule in scheduleList:
-            formattedText += schedule + ', '         
+            formattedText += schedule + ', '
         return formattedText[:-2] + '.\n'
