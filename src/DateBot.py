@@ -91,26 +91,12 @@ class DateBot:
         Utils.showStartMenu(bot, update)
 
     def selectTerm(self, bot, update):
-        keyboard = [
-            [
-                telegram.InlineKeyboardButton('Matriculas e Rematriculas', callback_data = 'date-matriculas'),
-                telegram.InlineKeyboardButton('CCRs', callback_data = 'date-ccr')
-            ],
-            [
-                telegram.InlineKeyboardButton('Aulas e Férias/Feriados', callback_data = 'date-aulas'),
-                telegram.InlineKeyboardButton('ACCs', callback_data = 'date-acc')
-            ],
-            [
-                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
-            ]
+        buttonsNameAndData = [
+            ['Matriculas e Rematriculas', 'date-matriculas'],
+            ['CCRs', 'date-ccr'],
+            ['Aulas e Férias/Feriados', 'date-aulas'],
+            ['ACCs', 'date-acc']
         ]
-
-        replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
-
-        bot.editMessageText(
-            message_id = update.callback_query.message.message_id,
-            chat_id = update.callback_query.message.chat.id,
-            text = '*Selecione o Assunto:*',
-            parse_mode = 'Markdown',
-            reply_markup = replyMarkup
-        )
+        textToShow = '*Selecione o Assunto:*'
+        numButtonsPerLine = 2
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)

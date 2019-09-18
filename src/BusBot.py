@@ -1,4 +1,5 @@
 import telegram
+from Utils import Utils
 
 class BusBot:
     assetFolderPath = 'assets/BusBot/'
@@ -70,57 +71,28 @@ class BusBot:
             self.schedules[city] = results
 
     def selectCampus(self, bot, update):
-        keyboard = [
-            [
-                telegram.InlineKeyboardButton('Campus Chapecó', callback_data = 'bus-cco'),
-                telegram.InlineKeyboardButton('Campus Cerro Largo', callback_data = 'bus-cerro')
-            ],
-            [
-                telegram.InlineKeyboardButton('Campus Erechim', callback_data = 'bus-erechim'),
-                telegram.InlineKeyboardButton('Campus Laranjeiras', callback_data = 'bus-laranjeiras')
-            ],
-            [
-                telegram.InlineKeyboardButton('Campus Passo Fundo', callback_data = 'bus-passofundo'),
-                telegram.InlineKeyboardButton('Campus Realeza', callback_data = 'bus-realeza')
-            ],
-            [
-                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
-            ]
+        buttonsNameAndData = [
+            ['Campus Chapecó', 'bus-cco'],
+            ['Campus Cerro Largo', 'bus-cerro'],
+            ['Campus Erechim', 'bus-erechim'],
+            ['Campus Laranjeiras', 'bus-laranjeiras'],
+            ['Campus Passo Fundo', 'bus-passofundo'],
+            ['Campus Realeza', 'bus-realeza']
         ]
-
-        replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
-
-        bot.editMessageText(
-            message_id = update.callback_query.message.message_id,
-            chat_id = update.callback_query.message.chat.id,
-            text = '*Selecione o campus:*',
-            parse_mode = 'Markdown',
-            reply_markup = replyMarkup
-        )
+        textToShow = '*Selecione o campus:*'
+        numButtonsPerLine = 2
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
 
     def selectStartPoint(self, bot, update, city):
-        keyboard = [
-            [
-                telegram.InlineKeyboardButton('Terminal', callback_data = 'startPointBus-terminal-' + city + '-week'),
-                telegram.InlineKeyboardButton('Terminal (Sábado)', callback_data = 'startPointBus-terminal-' + city + '-sat'),
-            ],
-            [
-                telegram.InlineKeyboardButton('UFFS', callback_data = 'startPointBus-uffs-' + city + '-week'),
-                telegram.InlineKeyboardButton('UFFS (Sábado)', callback_data = 'startPointBus-uffs-' + city + '-sat'),
-            ],
-            [
-                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
-            ]
+        buttonsNameAndData = [
+            ['Terminal', 'startPointBus-terminal-' + city + '-week'],
+            ['Terminal (Sábado)', 'startPointBus-terminal-' + city + '-sat'],
+            ['UFFS', 'startPointBus-uffs-' + city + '-week'],
+            ['UFFS (Sábado)', 'startPointBus-uffs-' + city + '-sat']
         ]
-        replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
-
-        bot.editMessageText(
-            message_id = update.callback_query.message.message_id,
-            chat_id = update.callback_query.message.chat.id,
-            text = '*Selecione o ponto de partida:*',
-            parse_mode = 'Markdown',
-            reply_markup = replyMarkup
-        )
+        textToShow = '*Selecione o ponto de partida:*'
+        numButtonsPerLine = 2
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
 
     def showSchedule(self, bot, update, startPointAndCityAndPeriod):
         startPointAndCityAndPeriod = startPointAndCityAndPeriod.split('-')

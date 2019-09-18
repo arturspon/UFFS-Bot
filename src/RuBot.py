@@ -53,57 +53,28 @@ class RuBot:
         return imgUrl
 
     def selectCampus(self, bot, update):
-        keyboard = [
-            [
-                telegram.InlineKeyboardButton('RU Chapecó', callback_data = 'RU-chapeco'),
-                telegram.InlineKeyboardButton('RU Cerro Largo', callback_data = 'RU-cerro-largo'),
-                telegram.InlineKeyboardButton('RU Erechim', callback_data = 'RU-erechim')
-            ],
-            [
-                telegram.InlineKeyboardButton('RU Laranjeiras', callback_data = 'RU-laranjeiras-do-sul'),
-                telegram.InlineKeyboardButton('RU Realeza', callback_data = 'RU-realeza')
-            ],
-            [
-                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
-            ]
+        buttonsNameAndData = [
+            ['RU Chapecó', 'RU-chapeco'],
+            ['RU Cerro Largo', 'RU-cerro-largo'],
+            ['RU Erechim', 'RU-erechim'],
+            ['RU Laranjeiras', 'RU-laranjeiras-do-sul'],
+            ['RU Realeza', 'RU-realeza']
         ]
-        replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
-
-        bot.editMessageText(
-            message_id = update.callback_query.message.message_id,
-            chat_id = update.callback_query.message.chat.id,
-            text = '*Selecione o campus:*',
-            parse_mode = 'Markdown',
-            reply_markup = replyMarkup
-        )
+        textToShow = '*Selecione o campus:*'
+        numButtonsPerLine = 3
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
 
     def selectCampusAuto(self, bot, update, period):
-        try:
-            keyboard = [
-                [
-                    telegram.InlineKeyboardButton('Chapecó', callback_data = 'AUTO/'+period+'/chapeco'),
-                    telegram.InlineKeyboardButton('Cerro Largo', callback_data = 'AUTO/'+period+'/cerro-largo'),
-                    telegram.InlineKeyboardButton('Erechim', callback_data = 'AUTO/'+period+'/erechim')
-                ],
-                [
-                    telegram.InlineKeyboardButton('Laranjeiras', callback_data = 'AUTO/'+period+'/laranjeiras-do-sul'),
-                    telegram.InlineKeyboardButton('Realeza', callback_data = 'AUTO/'+period+'/realeza')
-                ],
-                [
-                    telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
-                ]
-            ]
-            replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
-
-            bot.editMessageText(
-                message_id = update.callback_query.message.message_id,
-                chat_id = update.callback_query.message.chat.id,
-                text = 'Selecione o campus:',
-                parse_mode = 'HTML',
-                reply_markup = replyMarkup
-            )
-        except Exception as e:
-            print("selectCampusAuto: "+str(e)+"\n")
+        buttonsNameAndData = [
+            ['Chapecó', 'AUTO/'+period+'/chapeco'],
+            ['Cerro Largo', 'AUTO/'+period+'/cerro-largo'],
+            ['Erechim', 'AUTO/'+period+'/erechim'],
+            ['Laranjeiras', 'AUTO/'+period+'/laranjeiras-do-sul'],
+            ['Realeza', 'AUTO/'+period+'/realeza']
+        ]
+        textToShow = '*Selecione o campus:*'
+        numButtonsPerLine = 3
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
 
     def showCardapio(self, bot, update, campus):
         chatId = Utils.getChatId(bot, update)
@@ -303,28 +274,13 @@ class RuBot:
             dailyButton += ' ✔'
         if self.isInDataBase(chat_id, 'weekly'):
             weeklyButton += ' ✔'
-        keyboard = [
-            [
-                telegram.InlineKeyboardButton(dailyButton, callback_data = 'daily'),
-                telegram.InlineKeyboardButton(weeklyButton, callback_data = 'weekly')
-            ],
-            [
-                telegram.InlineKeyboardButton('Desativar cardapio automático', callback_data = 'unsub')
-            ],
-            [
-                telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')
-            ]
+        buttonsNameAndData = [
+            [dailyButton, 'daily'],
+            [weeklyButton, 'weekly']
         ]
-
-        replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
-
-        bot.editMessageText(
-            message_id = update.callback_query.message.message_id,
-            chat_id = chat_id,
-            text = 'Selecione a periodicidade:',
-            parse_mode = 'HTML',
-            reply_markup = replyMarkup
-        )
+        textToShow = '*Selecione a periodicidade:*'
+        numButtonsPerLine = 2
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
 
     def getImages(self):
         try:
