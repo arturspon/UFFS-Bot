@@ -256,9 +256,10 @@ class RuBot:
                     cell = row.findAll('td')[date.today().weekday()].findAll('p')
                     text = ''
                     for line in cell:
-                        text = text + line.text + ' '
+                        text += line.text + ' '
+                        text = text.strip()
                     if(i == 0):
-                        column += text.lower() + 'será:*'
+                        column += text.lower() + ' será:*'
                         continue
                     column += '\n' + text
                 self.dailyMenus[today] = column
