@@ -9,7 +9,7 @@ class CanteenBot:
         ]
         textToShow = '*Selecione o campus:*'
         numButtonsPerLine = 2
-        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine, True)
 
     def showCardapio(self, bot, update):
         imgToSend = 'https://i.imgur.com/ec3Rvub.png'

@@ -99,4 +99,4 @@ class DateBot:
         ]
         textToShow = '*Selecione o Assunto:*'
         numButtonsPerLine = 2
-        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine, True)

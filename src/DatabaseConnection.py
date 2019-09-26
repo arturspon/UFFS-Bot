@@ -5,22 +5,35 @@ class DatabaseConnection:
     def __init__(self):
         try:
             self.DATABASE_URL = databaseToken
-            self.conn = psycopg2.connect(self.DATABASE_URL, sslmode='require')
-            self.conn.autocommit = True
+            self.openConnection()
         except Exception as e:
             print('Não foi possível conectar ao database: ', e)
 
+    def openConnection(self):
+        self.conn = psycopg2.connect(self.DATABASE_URL, sslmode='require')
+        self.conn.autocommit = True
+
     def fetchAll(self, query, args):
-        self.cursor = self.conn.cursor()
-        self.cursor.execute(query, args)
-        results = self.cursor.fetchall()
-        self.cursor.close()
-        return results
+        try:
+            self.cursor = self.conn.cursor()
+            self.cursor.execute(query, args)
+            results = self.cursor.fetchall()
+            self.cursor.close()
+            return results
+        except Exception as e:
+            print('Um erro ocorreu no fetchAll:', e, ', tentando reabrir a conexão')
+            self.openConnection()
+            return self.fetchAll(query, args)
 
     def executeQuery(self, query, args):
-        self.cursor = self.conn.cursor()
-        self.cursor.execute(query, args)
-        self.cursor.close()
+        try:
+            self.cursor = self.conn.cursor()
+            self.cursor.execute(query, args)
+            self.cursor.close()
+        except Exception as e:
+            print('Um erro ocorreu no executeQuery:', e, ', tentando reabrir a conexão')
+            self.openConnection()
+            self.executeQuery(query, args)
 
     def createTables(self):
         self.cursor = self.conn.cursor()

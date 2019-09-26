@@ -118,10 +118,10 @@ class Utils:
         ]
         textToShow = '*Olá!\nSelecione uma opção para continuar...*'
         numButtonsPerLine = 2
-        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine, False)
 
     @staticmethod
-    def keyboardOptions(bot, update, buttonsNameAndData, textToShow, maxButtonsPerLine):
+    def keyboardOptions(bot, update, buttonsNameAndData, textToShow, maxButtonsPerLine, showBackToMenuButton):
         keyboard = []
         for i, button in enumerate(buttonsNameAndData):
             buttonName = button[0]
@@ -131,7 +131,8 @@ class Utils:
             else:
                 keyboard[len(keyboard) - 1].append(telegram.InlineKeyboardButton(buttonName, callback_data = buttonData))
 
-        keyboard.append([telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')])
+        if showBackToMenuButton:
+            keyboard.append([telegram.InlineKeyboardButton('← Menu principal', callback_data = 'main-menu')])
 
         replyMarkup = telegram.InlineKeyboardMarkup(keyboard)
 

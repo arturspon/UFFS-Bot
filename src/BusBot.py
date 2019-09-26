@@ -81,7 +81,7 @@ class BusBot:
         ]
         textToShow = '*Selecione o campus:*'
         numButtonsPerLine = 2
-        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine, True)
 
     def selectStartPoint(self, bot, update, city):
         buttonsNameAndData = [
@@ -92,7 +92,7 @@ class BusBot:
         ]
         textToShow = '*Selecione o ponto de partida:*'
         numButtonsPerLine = 2
-        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine, True)
 
     def showSchedule(self, bot, update, startPointAndCityAndPeriod):
         startPointAndCityAndPeriod = startPointAndCityAndPeriod.split('-')

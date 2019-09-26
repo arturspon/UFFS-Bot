@@ -62,7 +62,7 @@ class RuBot:
         ]
         textToShow = '*Selecione o campus:*'
         numButtonsPerLine = 3
-        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine, True)
 
     def selectCampusAuto(self, bot, update, period):
         buttonsNameAndData = [
@@ -74,7 +74,7 @@ class RuBot:
         ]
         textToShow = '*Selecione o campus:*'
         numButtonsPerLine = 3
-        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine, True)
 
     def showCardapio(self, bot, update, campus):
         chatId = Utils.getChatId(bot, update)
@@ -281,7 +281,7 @@ class RuBot:
         ]
         textToShow = '*Selecione a periodicidade:*'
         numButtonsPerLine = 2
-        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine)
+        Utils.keyboardOptions(bot, update, buttonsNameAndData, textToShow, numButtonsPerLine, True)
 
     def getImages(self):
         try:
