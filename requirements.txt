@@ -1,5 +1,5 @@
 beautifulsoup4==4.6.0
-requests==2.20.0
+requests==2.31.0
 requests-unixsocket==0.1.5
 python-telegram-bot==11.1.0
 python-dotenv==0.10.3
